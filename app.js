@@ -180,9 +180,12 @@ function renderHome(){
     return '<div class="mini-row"><span>' + esc(e.title) + ' <span class="faint">· ' + esc(nameOf(e.author)) + '</span></span><span class="faint tabular">' + fmtDate(e.date) + '(' + fmtDow(e.date) + ')</span></div>';
   }).join('') : '<div class="empty">다가오는 일정이 없어요</div>';
 
-  var recent = state.entries[0];
-  var recentHtml = recent
-    ? '<div class="card"><div class="row" style="justify-content:space-between; margin-bottom:6px;"><span class="pill" style="background:var(--sky-bg); color:var(--sky);">' + esc(nameOf(recent.author)) + '</span><span class="faint tabular">' + fmtDate(recent.date) + '</span></div><div style="font-size:14px; line-height:1.5;">' + esc(recent.text).slice(0,120) + '</div></div>'
+  var recentEntries = state.entries.slice(0, 10);
+  var recentHtml = recentEntries.length
+    ? '<div class="card">' + recentEntries.map(function(e){
+        var snippet = e.text.length > 28 ? e.text.slice(0, 28) + '…' : e.text;
+        return '<div class="mini-row"><span>' + esc(nameOf(e.author)) + ' <span class="faint">· ' + esc(snippet) + '</span></span><span class="faint tabular">' + fmtDate(e.date) + '</span></div>';
+      }).join('') + '</div>'
     : '<div class="empty">아직 기록이 없어요. 기록 탭에서 첫 글을 남겨보세요</div>';
 
   el.innerHTML =
@@ -483,11 +486,15 @@ function renderMessages(){
       '<div class="q-text">' + esc(q) + '</div>' +
       '<div class="ans-grid">' + myAnsHtml + partnerAnsHtml + '</div>' +
     '</div>' +
-    '<div class="section-title">메시지</div>' +
-    '<div style="display:flex; flex-direction:column;">' + msgsHtml + '</div>' +
-    '<div class="composer" style="margin-top:12px;">' +
-      '<textarea class="input" id="newMessage" rows="1" placeholder="' + esc(partnerName()) + '에게 쪽지 남기기"></textarea>' +
-      '<button class="btn" onclick="sendMessage()">전송</button>' +
+    '<div class="msg-section">' +
+      '<div class="section-title" style="margin-top:0;">메시지</div>' +
+      '<div class="card">' +
+        '<div style="display:flex; flex-direction:column;">' + msgsHtml + '</div>' +
+        '<div class="composer" style="margin-top:12px;">' +
+          '<textarea class="input" id="newMessage" rows="1" placeholder="' + esc(partnerName()) + '에게 쪽지 남기기"></textarea>' +
+          '<button class="btn" onclick="sendMessage()">전송</button>' +
+        '</div>' +
+      '</div>' +
     '</div>';
 }
 window.saveAnswer = function(){
