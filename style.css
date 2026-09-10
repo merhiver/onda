@@ -255,7 +255,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   .navbtn.active{background:rgba(14,165,183,.14); color:var(--primary-active);}
   .navbtn svg{width:19px; height:19px; flex:none;}
   .navbtn .dot{position:static; margin-left:auto;}
-  main{max-width:640px; margin:0 auto; padding:0 8px 60px 40px;}
+  main{flex:1 1 0%; min-width:0; width:100%; max-width:640px; margin:0 auto; padding:0 8px 60px 40px;}
   #topbar{padding:0 8px 20px 40px;}
   #topbarWord{font-size:28px;}
   .overlay{align-items:center;}
