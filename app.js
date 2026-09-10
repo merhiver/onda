@@ -308,7 +308,7 @@ function renderBucket(){
     return '<div class="bucket-item">' +
       '<button class="check' + (b.done?' done':'') + '" onclick="toggleBucket(\''+b.id+'\',' + b.done + ')" aria-label="완료 표시">' + (b.done?'✓':'') + '</button>' +
       '<span class="txt' + (b.done?' done':'') + '">' + esc(b.text) + (b.done && b.doneDate ? ' <span class="faint">(' + fmtDate(b.doneDate) + ' 완료)</span>' : '') +
-      (b.mapUrl ? ' <a href="' + esc(b.mapUrl) + '" target="_blank" rel="noopener" class="faint" style="text-decoration:underline;">🗺️ 지도</a>' : '') +
+      (b.mapUrl ? ' <button type="button" class="link-btn" onclick="openMapView(\''+b.id+'\')">🗺️ 지도</button>' : '') +
       '</span>' +
       '<button class="del" onclick="deleteBucket(\''+b.id+'\')">✕</button>' +
     '</div>';
@@ -396,6 +396,41 @@ window.addBucket = function(){
   selectedPlace = null;
   var box = document.getElementById('placeResults');
   if(box) box.innerHTML = '';
+};
+function parseKakaoMapUrl(url){
+  try{
+    var m = /\/link\/map\/(.+)$/.exec(url);
+    if(!m) return null;
+    var parts = decodeURIComponent(m[1]).split(',');
+    if(parts.length < 3) return null;
+    var lng = parseFloat(parts[parts.length - 1]);
+    var lat = parseFloat(parts[parts.length - 2]);
+    var name = parts.slice(0, parts.length - 2).join(',');
+    if(isNaN(lat) || isNaN(lng)) return null;
+    return { name: name, lat: lat, lng: lng };
+  }catch(e){ return null; }
+}
+window.openMapView = function(id){
+  var item = state.bucket.find(function(b){ return b.id === id; });
+  if(!item || !item.mapUrl) return;
+  var place = parseKakaoMapUrl(item.mapUrl);
+  if(!place || !kakaoReady || !window.kakao || !kakao.maps){
+    window.open(item.mapUrl, '_blank', 'noopener');
+    return;
+  }
+  document.getElementById('overlayRoot').innerHTML =
+    '<div class="overlay"><div class="sheet map-sheet">' +
+      '<div class="row" style="justify-content:space-between; margin-bottom:12px;">' +
+        '<h2 style="margin:0;">' + esc(item.text) + '</h2>' +
+        '<button class="del" onclick="closeOverlay()" aria-label="닫기">✕</button>' +
+      '</div>' +
+      '<div id="mapView"></div>' +
+    '</div></div>';
+  var center = new kakao.maps.LatLng(place.lat, place.lng);
+  var map = new kakao.maps.Map(document.getElementById('mapView'), { center: center, level: 4 });
+  new kakao.maps.Marker({ position: center, map: map });
+  map.relayout();
+  map.setCenter(center);
 };
 window.toggleBucket = function(id, wasDone){
   if(!dbApi) return;
