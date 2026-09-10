@@ -37,7 +37,7 @@
 html,body{margin:0; padding:0;}
 body{
   background:var(--canvas); color:var(--ink);
-  font-family:"Inter",-apple-system,"Segoe UI",system-ui,sans-serif;
+  font-family:"Pretendard Variable","Pretendard",-apple-system,"Segoe UI",system-ui,"Malgun Gothic",sans-serif;
   -webkit-font-smoothing:antialiased;
 }
 h1,h2,h3{text-wrap:balance; margin:0;}
