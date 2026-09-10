@@ -228,7 +228,7 @@ main{flex:1; padding:4px 18px 96px; overflow-x:hidden;}
   #nav{
     position:sticky; top:32px; bottom:auto; height:calc(100vh - 64px); width:220px; flex:none;
     display:flex; flex-direction:column; align-items:stretch; gap:2px;
-    border-top:none; border-right:1px solid var(--hairline);
+    border-top:none;
     background:transparent; border-radius:0; padding:8px 12px 12px 0;
   }
   .navbtn{
