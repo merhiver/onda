@@ -308,7 +308,6 @@ function renderBucket(){
     return '<div class="bucket-item">' +
       '<button class="check' + (b.done?' done':'') + '" onclick="toggleBucket(\''+b.id+'\',' + b.done + ')" aria-label="완료 표시">' + (b.done?'✓':'') + '</button>' +
       '<span class="txt' + (b.done?' done':'') + '">' + esc(b.text) + (b.done && b.doneDate ? ' <span class="faint">(' + fmtDate(b.doneDate) + ' 완료)</span>' : '') +
-      (b.mapUrl ? ' <button type="button" class="link-btn" onclick="openMapView(\''+b.id+'\')">🗺️ 지도</button>' : '') +
       '</span>' +
       '<button class="del" onclick="deleteBucket(\''+b.id+'\')">✕</button>' +
     '</div>';
@@ -323,6 +322,7 @@ function renderBucket(){
         '</div>' +
         '<div id="placeResults"></div>' +
         '<button class="btn block" onclick="addBucket()">추가</button>' +
+        '<div id="dateMap"></div>' +
       '</div>'
     : '<div class="composer" style="margin-bottom:16px;">' +
         '<input class="input" id="newBucketText" placeholder="같이 하고 싶은 일 추가" onkeydown="if(event.key===\'Enter\')addBucket()">' +
@@ -336,8 +336,45 @@ function renderBucket(){
     '</div>' +
     addBar +
     '<div class="card">' + listHtml + '</div>';
+
+  if(isDate) renderDateMap();
 }
 window.setBucketFilter = function(k){ selectedPlace = null; state.bucketFilter = k; renderBucket(); };
+
+function renderDateMap(){
+  var container = document.getElementById('dateMap');
+  if(!container) return;
+  var places = state.bucket
+    .filter(function(b){ return b.kind === 'date' && b.mapUrl; })
+    .map(function(b){
+      var p = parseKakaoMapUrl(b.mapUrl);
+      return p ? { lat: p.lat, lng: p.lng, text: b.text } : null;
+    })
+    .filter(Boolean);
+
+  if(!kakaoReady || !window.kakao || !kakao.maps){
+    container.innerHTML = '<div class="empty">지도를 불러오는 중이에요</div>';
+    return;
+  }
+  if(!places.length){
+    container.innerHTML = '<div class="empty">장소를 검색해서 추가하면 여기 지도에 핀으로 표시돼요</div>';
+    return;
+  }
+  container.innerHTML = '';
+  var center = new kakao.maps.LatLng(places[0].lat, places[0].lng);
+  var map = new kakao.maps.Map(container, { center: center, level: 6 });
+  var bounds = new kakao.maps.LatLngBounds();
+  places.forEach(function(p){
+    var pos = new kakao.maps.LatLng(p.lat, p.lng);
+    var marker = new kakao.maps.Marker({ position: pos, map: map });
+    bounds.extend(pos);
+    var iw = new kakao.maps.InfoWindow({ content: '<div style="padding:5px 10px; font-size:12px; white-space:nowrap;">' + esc(p.text) + '</div>' });
+    kakao.maps.event.addListener(marker, 'click', function(){ iw.open(map, marker); });
+  });
+  map.relayout();
+  if(places.length > 1) map.setBounds(bounds);
+  else map.setCenter(center);
+}
 
 /* Kakao Places keyword search (real autocomplete, replaces the old "open new tab" flow) */
 var kakaoReady = false;
@@ -410,28 +447,6 @@ function parseKakaoMapUrl(url){
     return { name: name, lat: lat, lng: lng };
   }catch(e){ return null; }
 }
-window.openMapView = function(id){
-  var item = state.bucket.find(function(b){ return b.id === id; });
-  if(!item || !item.mapUrl) return;
-  var place = parseKakaoMapUrl(item.mapUrl);
-  if(!place || !kakaoReady || !window.kakao || !kakao.maps){
-    window.open(item.mapUrl, '_blank', 'noopener');
-    return;
-  }
-  document.getElementById('overlayRoot').innerHTML =
-    '<div class="overlay"><div class="sheet map-sheet">' +
-      '<div class="row" style="justify-content:space-between; margin-bottom:12px;">' +
-        '<h2 style="margin:0;">' + esc(item.text) + '</h2>' +
-        '<button class="del" onclick="closeOverlay()" aria-label="닫기">✕</button>' +
-      '</div>' +
-      '<div id="mapView"></div>' +
-    '</div></div>';
-  var center = new kakao.maps.LatLng(place.lat, place.lng);
-  var map = new kakao.maps.Map(document.getElementById('mapView'), { center: center, level: 4 });
-  new kakao.maps.Marker({ position: center, map: map });
-  map.relayout();
-  map.setCenter(center);
-};
 window.toggleBucket = function(id, wasDone){
   if(!dbApi) return;
   dbApi.collection('bucket').doc(id).update({done: !wasDone, doneDate: !wasDone ? todayStr() : null});
