@@ -133,23 +133,39 @@ window.switchTab = function(t){
   document.getElementById('panel-'+t).classList.add('active');
   document.querySelectorAll('.navbtn').forEach(function(el){ el.classList.toggle('active', el.dataset.tab === t); });
   document.getElementById('topbarWord').textContent = ({
-    home:'onda', calendar:'캘린더', record:'기록', bucket:'버킷 & 데이트', messages:'메시지 & 질문'
+    home:'onda', calendar:'캘린더', record:'기록', bucket:'버킷 & 데이트', question:'오늘의 질문'
   })[t];
-  if(t === 'messages' && dbApi && ME){
+  renderAll();
+};
+
+/* ---------- chat widget (floating, independent of tabs) ---------- */
+var chatOpen = false;
+window.toggleChat = function(){ chatOpen ? closeChat() : openChat(); };
+function openChat(){
+  chatOpen = true;
+  document.getElementById('chatPanel').hidden = false;
+  if(dbApi && ME){
     state.lastSeenTs = Date.now();
     dbApi.doc('lastSeen/'+ME).set({ts: state.lastSeenTs});
     updateBadge();
   }
-  renderAll();
+  renderChat();
+}
+window.closeChat = function(){
+  chatOpen = false;
+  document.getElementById('chatPanel').hidden = true;
 };
 
 /* ---------- badge ---------- */
 function updateBadge(){
   var unread = state.messages.filter(function(m){ return m.author !== ME && m.createdAt > state.lastSeenTs; }).length;
+  var chatDot = document.getElementById('chatDot');
+  if(chatDot) chatDot.hidden = !(unread > 0);
+
   var partnerAnsweredToday = state.answers.some(function(a){ return a.author === PARTNER && a.date === todayStr(); });
   var iAnsweredToday = state.answers.some(function(a){ return a.author === ME && a.date === todayStr(); });
-  var show = unread > 0 || (partnerAnsweredToday && !iAnsweredToday);
-  document.getElementById('msgDot').hidden = !show;
+  var qDot = document.getElementById('questionDot');
+  if(qDot) qDot.hidden = !(partnerAnsweredToday && !iAnsweredToday);
 }
 
 /* ---------- render dispatch ---------- */
@@ -158,7 +174,8 @@ function renderAll(){
   renderCalendar();
   renderRecord();
   renderBucket();
-  renderMessages();
+  renderQuestion();
+  renderChat();
   updateBadge();
 }
 
@@ -459,9 +476,10 @@ window.deleteBucket = function(id){
   dbApi.collection('bucket').doc(id).delete();
 };
 
-/* ---------- MESSAGES + QUESTION ---------- */
-function renderMessages(){
-  var el = document.getElementById('panel-messages');
+/* ---------- QUESTION OF THE DAY (tab content) ---------- */
+function renderQuestion(){
+  var el = document.getElementById('panel-question');
+  if(!el) return;
   var q = todayQuestion();
   var myAns = state.answers.find(function(a){ return a.author === ME && a.date === todayStr(); });
   var partnerAns = state.answers.find(function(a){ return a.author === PARTNER && a.date === todayStr(); });
@@ -473,28 +491,11 @@ function renderMessages(){
     ? '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt">' + esc(partnerAns.text) + '</div></div>'
     : '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt faint">아직 답변 전이에요</div></div>';
 
-  var msgsHtml = state.messages.length ? state.messages.slice().reverse().map(function(m){
-    var mine = m.author === ME;
-    return '<div class="msg ' + (mine?'me':'partner') + '">' + esc(m.text) +
-      (mine ? '<button class="del" onclick="deleteMessage(\''+m.id+'\')" aria-label="삭제">✕</button>' : '') +
-      '</div>';
-  }).join('') : '<div class="empty">아직 남긴 메시지가 없어요</div>';
-
   el.innerHTML =
     '<div class="q-card">' +
       '<div class="q-label">오늘의 질문</div>' +
       '<div class="q-text">' + esc(q) + '</div>' +
       '<div class="ans-grid">' + myAnsHtml + partnerAnsHtml + '</div>' +
-    '</div>' +
-    '<div class="msg-section">' +
-      '<div class="section-title" style="margin-top:0;">메시지</div>' +
-      '<div class="card">' +
-        '<div style="display:flex; flex-direction:column;">' + msgsHtml + '</div>' +
-        '<div class="composer" style="margin-top:12px;">' +
-          '<textarea class="input" id="newMessage" rows="1" placeholder="' + esc(partnerName()) + '에게 쪽지 남기기"></textarea>' +
-          '<button class="btn" onclick="sendMessage()">전송</button>' +
-        '</div>' +
-      '</div>' +
     '</div>';
 }
 window.saveAnswer = function(){
@@ -503,6 +504,28 @@ window.saveAnswer = function(){
   if(!text || !dbApi) return;
   dbApi.doc('answers/' + todayStr() + '_' + ME).set({date: todayStr(), author: ME, text: text, createdAt: Date.now()});
 };
+
+/* ---------- MESSAGES (floating chat widget, global) ---------- */
+function renderChat(){
+  var panel = document.getElementById('chatPanel');
+  if(!panel || panel.hidden) return;
+  var msgsHtml = state.messages.length ? state.messages.slice().reverse().map(function(m){
+    var mine = m.author === ME;
+    return '<div class="msg ' + (mine?'me':'partner') + '">' + esc(m.text) +
+      (mine ? '<button class="del" onclick="deleteMessage(\''+m.id+'\')" aria-label="삭제">✕</button>' : '') +
+      '</div>';
+  }).join('') : '<div class="empty">아직 남긴 메시지가 없어요</div>';
+
+  panel.innerHTML =
+    '<div class="chat-head"><span>' + esc(partnerName()) + '에게 쪽지</span><button class="del" onclick="closeChat()" aria-label="닫기">✕</button></div>' +
+    '<div class="chat-body">' + msgsHtml + '</div>' +
+    '<div class="composer chat-composer">' +
+      '<textarea class="input" id="newMessage" rows="1" placeholder="' + esc(partnerName()) + '에게 쪽지 남기기"></textarea>' +
+      '<button class="btn" onclick="sendMessage()">전송</button>' +
+    '</div>';
+  var body = panel.querySelector('.chat-body');
+  if(body) body.scrollTop = body.scrollHeight;
+}
 window.sendMessage = function(){
   var ta = document.getElementById('newMessage');
   var text = ta.value.trim();
