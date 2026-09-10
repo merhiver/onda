@@ -15,6 +15,11 @@ var ME = null, PARTNER = null;
   PARTNER = ME === 'a' ? 'b' : (ME === 'b' ? 'a' : null);
 })();
 
+/* ---------- layout preview (temporary, ?preview=sidebar|stats|grid|photo) ---------- */
+/* Lets the wide-screen "what should fill the empty space" options be
+   compared live via URL, without touching the shipped default layout. */
+var PREVIEW_MODE = new URLSearchParams(location.search).get('preview') || null;
+
 /* ---------- app theme (per-browser, picked from Settings > 테마) ---------- */
 function getAppTheme(){
   try{ return localStorage.getItem('onda_theme') || 'wave'; }catch(e){ return 'wave'; }
@@ -232,7 +237,59 @@ function renderAll(){
   renderBucket();
   renderQuestion();
   renderChat();
+  renderSideWidget();
   updateBadge();
+}
+
+/* ---------- layout preview widgets (see PREVIEW_MODE above) ---------- */
+function computeStreak(){
+  var dates = {};
+  state.entries.forEach(function(e){ dates[e.date] = true; });
+  var streak = 0, d = new Date();
+  while(dates[toDateStr(d)]){ streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+function bucketCompletion(){
+  if(!state.bucket.length) return '0%';
+  var done = state.bucket.filter(function(b){ return b.done; }).length;
+  return Math.round(done / state.bucket.length * 100) + '%';
+}
+function renderSideWidget(){
+  var el = document.getElementById('sideWidget');
+  var shell = document.getElementById('shell');
+  if(!el || !shell) return;
+  if(PREVIEW_MODE !== 'sidebar' && PREVIEW_MODE !== 'stats'){
+    el.hidden = true;
+    shell.classList.remove('has-side-widget');
+    return;
+  }
+  shell.classList.add('has-side-widget');
+  el.hidden = false;
+
+  if(PREVIEW_MODE === 'sidebar'){
+    var p = state.profile;
+    var ddayText = (p && p.anniversary)
+      ? ('D+' + (Math.floor((startOfDay(new Date()) - startOfDay(parseDate(p.anniversary))) / 86400000) + 1))
+      : '디데이 미설정';
+    var myAns = state.answers.find(function(a){ return a.author === ME && a.date === todayStr(); });
+    var upcoming = state.events.filter(function(e){ return e.date >= todayStr(); }).sort(function(a,b){ return a.date < b.date ? -1 : 1; })[0];
+    el.innerHTML =
+      '<div class="card"><div class="widget-title">디데이</div><div style="font-family:var(--font-display); font-size:22px; color:var(--primary);">' + esc(ddayText) + '</div></div>' +
+      '<div class="card"><div class="widget-title">오늘의 질문</div><div style="font-size:13px; margin:4px 0 8px; line-height:1.4;">' + esc(todayQuestion()) + '</div>' +
+        (myAns ? '<div class="faint">답변 완료</div>' : '<div class="faint">아직 답변 전</div>') +
+      '</div>' +
+      '<div class="card"><div class="widget-title">다가오는 일정</div>' +
+        (upcoming ? '<div style="font-size:13px; margin-top:4px;">' + esc(upcoming.title) + ' · ' + fmtDate(upcoming.date) + '</div>' : '<div class="faint">없음</div>') +
+      '</div>';
+  } else {
+    el.innerHTML =
+      '<div class="card"><div class="widget-title">커플 통계</div>' +
+        '<div class="stat-row"><span>연속 기록</span><span class="stat-num tabular">' + computeStreak() + '일</span></div>' +
+        '<div class="stat-row"><span>총 메시지</span><span class="stat-num tabular">' + state.messages.length + '개</span></div>' +
+        '<div class="stat-row"><span>총 기록</span><span class="stat-num tabular">' + state.entries.length + '개</span></div>' +
+        '<div class="stat-row"><span>버킷 완료</span><span class="stat-num tabular">' + bucketCompletion() + '</span></div>' +
+      '</div>';
+  }
 }
 
 /* ---------- HOME ---------- */
@@ -261,13 +318,22 @@ function renderHome(){
       }).join('') + '</div>'
     : '<div class="empty">아직 기록이 없어요. 기록 탭에서 첫 글을 남겨보세요</div>';
 
-  el.innerHTML =
-    '<div class="hero ocean-card"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
-    WAVE_SVG +
+  var listsHtml =
     '<div class="section-title">다가오는 일정</div>' +
     '<div class="card">' + upcomingHtml + '</div>' +
     '<div class="section-title">최근 기록</div>' +
     recentHtml;
+  if(PREVIEW_MODE === 'grid'){
+    listsHtml = '<div class="home-2col">' +
+      '<div><div class="section-title">다가오는 일정</div><div class="card">' + upcomingHtml + '</div></div>' +
+      '<div><div class="section-title">최근 기록</div>' + recentHtml + '</div>' +
+    '</div>';
+  }
+
+  el.innerHTML =
+    '<div class="hero ocean-card"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
+    WAVE_SVG +
+    listsHtml;
 }
 
 /* ---------- CALENDAR ---------- */
@@ -358,9 +424,17 @@ function renderRecord(){
       '</div><div class="txt">' + esc(e.text) + '</div></div>';
   }).join('') : '<div class="empty">아직 기록이 없어요. 오늘 있었던 일을 남겨보세요</div>';
 
+  var photoMockup = PREVIEW_MODE === 'photo'
+    ? '<div class="row" style="gap:8px;">' +
+        '<button type="button" class="btn secondary" disabled>📷 사진 추가</button>' +
+        '<span class="faint">미리보기 — 실제 저장은 아직 연결 안 됐어요</span>' +
+      '</div>'
+    : '';
+
   el.innerHTML =
     '<div class="card stack">' +
       '<textarea class="input" id="newEntryText" rows="3" placeholder="오늘 하루, 짧게 남겨보세요"></textarea>' +
+      photoMockup +
       '<button class="btn block" onclick="addEntry()">기록하기</button>' +
     '</div>' +
     '<div class="section-title">타임라인</div>' + list;
@@ -638,6 +712,10 @@ function openOnboardingIfNeeded(){
 async function boot(){
   if(!ME){ renderChooser(); return; }
   document.getElementById('overlayRoot').innerHTML = '';
+  if(PREVIEW_MODE === 'grid'){
+    var mainEl = document.querySelector('main');
+    if(mainEl) mainEl.classList.add('wide');
+  }
   switchTab('home');
   initKakao();
   try{

@@ -268,6 +268,24 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
     border-radius:var(--radius-xl); box-shadow:var(--shadow-3);
     border:1px solid var(--hairline);
   }
+
+  /* preview=sidebar / preview=stats: third column next to nav */
+  #shell.has-side-widget{max-width:1320px;}
+  .side-widget{
+    display:flex; flex-direction:column; gap:14px; width:280px; flex:none;
+    position:sticky; top:32px;
+  }
+  .side-widget[hidden]{display:none;}
+  .side-widget .card{margin:0;}
+  .side-widget .widget-title{font-family:var(--font-display); font-size:13px; color:var(--ink-muted); margin-bottom:2px;}
+  .stat-row{display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--hairline);}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row .stat-num{font-family:var(--font-display); font-size:20px; color:var(--primary);}
+
+  /* preview=grid: home upcoming + recent side by side, wider column */
+  main.wide{max-width:900px;}
+  .home-2col{display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;}
+  .home-2col .section-title{margin-top:0;}
 }
 
 /* ---- theme picker (settings sheet) ---- */
