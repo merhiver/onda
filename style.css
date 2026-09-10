@@ -236,7 +236,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 .nav-brand{display:none;}
 @media (min-width:880px){
   body{padding:32px 24px;}
-  #shell{max-width:1040px; flex-direction:row; align-items:flex-start; min-height:0;}
+  #shell{max-width:1040px; flex-direction:row; flex-wrap:wrap; align-items:flex-start; min-height:0;}
   .nav-brand{
     display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:18px;
     padding:8px 12px 18px;
@@ -256,7 +256,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   .navbtn svg{width:19px; height:19px; flex:none;}
   .navbtn .dot{position:static; margin-left:auto;}
   main{flex:1 1 0%; min-width:0; width:100%; max-width:640px; margin:0 auto; padding:0 8px 60px 40px;}
-  #topbar{padding:0 8px 20px 40px;}
+  #topbar{flex:0 0 100%; width:100%; padding:0 8px 20px 40px;}
   #topbarWord{font-size:28px;}
   .overlay{align-items:center;}
   .sheet{max-width:420px; border-radius:var(--radius-xl); box-shadow:var(--shadow-3);}
