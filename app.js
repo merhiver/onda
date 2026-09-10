@@ -102,8 +102,8 @@ function openSettings(){
     '<div class="overlay"><div class="sheet">' +
       '<h2>두 사람 정보</h2>' +
       '<p class="sub">이름과 사귄 날짜를 설정하면 홈에 디데이가 표시돼요. 둘 중 누가 저장해도 서로에게 바로 반영돼요.</p>' +
-      '<div class="field"><label>1번 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'" placeholder="예: 지수"></div>' +
-      '<div class="field"><label>2번 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'" placeholder="예: 준영"></div>' +
+      '<div class="field"><label>1번 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'"></div>' +
+      '<div class="field"><label>2번 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'"></div>' +
       '<div class="field"><label>사귄 날짜</label><input class="input" id="setAnni" type="date" value="'+esc(p.anniversary||'')+'"></div>' +
       '<div class="row" style="margin-top:14px;">' +
         '<button class="btn secondary block" onclick="closeOverlay()">닫기</button>' +
@@ -173,7 +173,7 @@ function renderHome(){
 
   var upcoming = state.events.filter(function(e){ return e.date >= todayStr(); }).sort(function(a,b){ return a.date < b.date ? -1 : 1; }).slice(0,3);
   var upcomingHtml = upcoming.length ? upcoming.map(function(e){
-    return '<div class="mini-row"><span>' + esc(e.title) + '</span><span class="faint tabular">' + fmtDate(e.date) + '(' + fmtDow(e.date) + ')</span></div>';
+    return '<div class="mini-row"><span>' + esc(e.title) + ' <span class="faint">· ' + esc(nameOf(e.author)) + '</span></span><span class="faint tabular">' + fmtDate(e.date) + '(' + fmtDow(e.date) + ')</span></div>';
   }).join('') : '<div class="empty">다가오는 일정이 없어요</div>';
 
   var recent = state.entries[0];
@@ -209,12 +209,17 @@ function renderCalendar(){
   for(var i=0;i<firstDow;i++) cells += '<div class="cal-day pad">.</div>';
   for(var d=1; d<=daysInMonth; d++){
     var ds = year+'-'+pad2(month+1)+'-'+pad2(d);
-    var hasEvent = state.events.some(function(e){ return e.date === ds; });
+    var dayEventsForDot = state.events.filter(function(e){ return e.date === ds; });
     var isAnni = annM === month && annD === d;
     var cls = 'cal-day' + (ds===todayS?' today':'') + (ds===state.selectedDay?' selected':'');
+    var dotsHtml = dayEventsForDot.length
+      ? '<span class="dots">' + dayEventsForDot.slice(0,4).map(function(e){
+          return '<span class="dot ' + (e.author === 'a' ? 'a' : 'b') + '"></span>';
+        }).join('') + '</span>'
+      : '';
     cells += '<button class="'+cls+'" onclick="selectDay(\''+ds+'\')">' +
       (isAnni ? '<span class="anni">🎂</span>' : '') + d +
-      (hasEvent ? '<span class="dot"></span>' : '') +
+      dotsHtml +
       '</button>';
   }
 
