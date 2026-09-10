@@ -159,6 +159,8 @@ var themes = [
   },
 ];
 
+// Font is unified across every theme (Pretendard only — no per-theme
+// display faces), so themes no longer set --font-display at all.
 function neutralVars(t, prefix) {
   var i = "  ";
   return i + "--canvas:" + t.canvas + "; --surface:" + t.surface + "; --surface-alt:" + t.surfaceAlt + ";\n" +
@@ -179,10 +181,9 @@ out.push("   ===================================================================
 themes.forEach(function (t) {
   var sel = '[data-app-theme="' + t.id + '"]';
   out.push("/* " + t.label + " */");
-  var shapeLine = "{\n  --font-display:" + t.fontDisplay + ";\n" +
-    (t.radii ? "  --radius-card:" + t.radii.card + "; --radius-sm:" + t.radii.sm + "; --radius-md:" + t.radii.md + "; --radius-xl:" + t.radii.xl + ";\n" : "") +
-    "}";
-  out.push(sel + shapeLine);
+  if (t.radii) {
+    out.push(sel + "{\n  --radius-card:" + t.radii.card + "; --radius-sm:" + t.radii.sm + "; --radius-md:" + t.radii.md + "; --radius-xl:" + t.radii.xl + ";\n}");
+  }
   out.push(sel + "{\n" + neutralVars(t.light) + "}");
   out.push("@media (prefers-color-scheme: dark){\n  " + sel + ':not([data-theme="light"]){\n' + neutralVars(t.dark).replace(/^/gm, "  ") + "  }\n}");
   out.push(sel + '[data-theme="dark"]{\n' + neutralVars(t.dark) + "}");
@@ -198,7 +199,6 @@ themes.forEach(function (t) {
 // 심야 (midnight) — deliberately dark-only, no light/dark switching
 out.push("/* 심야 — deliberately always dark (night sea), no light-mode variant */");
 out.push('[data-app-theme="midnight"]{');
-out.push("  --font-display:var(--font-body);");
 out.push(neutralVars({
   canvas:"#0a0a1a", surface:"#14142b", surfaceAlt:"#1c1c3a",
   ink:"#e8e6f5", ink2:"#c7c3e8", inkMuted:"#8886a8", inkFaint:"#56547a",

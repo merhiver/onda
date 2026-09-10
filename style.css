@@ -11,7 +11,7 @@
   --shadow-3: 0 18px 46px rgba(11,63,74,.20);
   --radius-card:20px; --radius-pill:9999px; --radius-sm:14px; --radius-md:16px; --radius-xl:26px;
   --font-body:"Pretendard Variable","Pretendard",-apple-system,"Segoe UI",system-ui,"Malgun Gothic",sans-serif;
-  --font-display:"Jua","Pretendard Variable","Pretendard",sans-serif;
+  --font-display:var(--font-body);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -346,7 +346,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 [data-app-theme="supabase"] .sheet h2,
 [data-app-theme="supabase"] .chat-head{font-family:var(--font-body); font-weight:600;}
 
-
 /* ====================================================================
    8 additional selectable app themes (see Settings > 테마).
    Each layers color/shape/font overrides on the wave base above —
@@ -354,9 +353,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
    ==================================================================== */
 
 /* 한여름 */
-[data-app-theme="summer"]{
-  --font-display:"Jua", var(--font-body);
-}
 [data-app-theme="summer"]{
   --canvas:#fff8e8; --surface:#ffffff; --surface-alt:#fdeecb;
   --ink:#2b2013; --ink-2:#4a3a20; --ink-muted:#8a7550; --ink-faint:#c9b98c;
@@ -392,9 +388,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 
 /* 한겨울 */
 [data-app-theme="winter"]{
-  --font-display:var(--font-body);
-}
-[data-app-theme="winter"]{
   --canvas:#f2f7fa; --surface:#ffffff; --surface-alt:#e6eef3;
   --ink:#16232c; --ink-2:#2c3e4a; --ink-muted:#66808f; --ink-faint:#a9bcc6;
   --hairline:#dbe6ec;
@@ -428,9 +421,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 [data-app-theme="winter"] .q-card .q-label{color:#8fd6ea;}
 
 /* 폭풍 */
-[data-app-theme="storm"]{
-  --font-display:var(--font-body);
-}
 [data-app-theme="storm"]{
   --canvas:#eef0f3; --surface:#ffffff; --surface-alt:#e3e7ec;
   --ink:#262b33; --ink-2:#3c4451; --ink-muted:#6b7280; --ink-faint:#a8b0ba;
@@ -466,9 +456,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 
 /* 산호초 */
 [data-app-theme="coral-reef"]{
-  --font-display:"Jua", var(--font-body);
-}
-[data-app-theme="coral-reef"]{
   --canvas:#eafbf6; --surface:#ffffff; --surface-alt:#d9f5ec;
   --ink:#0c2b24; --ink-2:#1c4b3f; --ink-muted:#5a8079; --ink-faint:#9dc2b8;
   --hairline:#cdeee2;
@@ -503,7 +490,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 
 /* 소금 */
 [data-app-theme="sea-salt"]{
-  --font-display:var(--font-body);
   --radius-card:14px; --radius-sm:8px; --radius-md:10px; --radius-xl:18px;
 }
 [data-app-theme="sea-salt"]{
@@ -541,9 +527,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 
 /* 밀물 */
 [data-app-theme="high-tide"]{
-  --font-display:"Jua", var(--font-body);
-}
-[data-app-theme="high-tide"]{
   --canvas:#f6ead9; --surface:#fffaf2; --surface-alt:#efdcc0;
   --ink:#2b241c; --ink-2:#453a2b; --ink-muted:#7d7365; --ink-faint:#bcae98;
   --hairline:#e6d7bf;
@@ -577,9 +560,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 [data-app-theme="high-tide"] .q-card .q-label{color:#e0ab73;}
 
 /* 윤슬 */
-[data-app-theme="yunseul"]{
-  --font-display:"Jua", var(--font-body);
-}
 [data-app-theme="yunseul"]{
   --canvas:#fdf6e6; --surface:#ffffff; --surface-alt:#faecc6;
   --ink:#12283a; --ink-2:#26435a; --ink-muted:#5c7488; --ink-faint:#a4b7c4;
@@ -615,7 +595,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 
 /* 심야 — deliberately always dark (night sea), no light-mode variant */
 [data-app-theme="midnight"]{
-  --font-display:var(--font-body);
   --canvas:#0a0a1a; --surface:#14142b; --surface-alt:#1c1c3a;
   --ink:#e8e6f5; --ink-2:#c7c3e8; --ink-muted:#8886a8; --ink-faint:#56547a;
   --hairline:#2a2a4a;
