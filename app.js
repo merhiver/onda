@@ -80,6 +80,9 @@ var QUESTIONS = [
 ];
 function todayQuestion(){ return QUESTIONS[dayOfYear(new Date()) % QUESTIONS.length]; }
 
+var WAVE_SVG = '<svg class="wave-deco" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true">' +
+  '<path d="M0 14 C 50 24 100 4 150 14 C 200 24 250 4 300 14 C 350 24 400 14 400 14 V24 H0 Z" fill="currentColor"/></svg>';
+
 /* ---------- identity chooser (fallback) ---------- */
 function renderChooser(){
   document.getElementById('overlayRoot').innerHTML =
@@ -206,7 +209,8 @@ function renderHome(){
     : '<div class="empty">아직 기록이 없어요. 기록 탭에서 첫 글을 남겨보세요</div>';
 
   el.innerHTML =
-    '<div class="hero"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
+    '<div class="hero ocean-card"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
+    WAVE_SVG +
     '<div class="section-title">다가오는 일정</div>' +
     '<div class="card">' + upcomingHtml + '</div>' +
     '<div class="section-title">최근 기록</div>' +
@@ -492,11 +496,12 @@ function renderQuestion(){
     : '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt faint">아직 답변 전이에요</div></div>';
 
   el.innerHTML =
-    '<div class="q-card">' +
+    '<div class="q-card ocean-card">' +
       '<div class="q-label">오늘의 질문</div>' +
       '<div class="q-text">' + esc(q) + '</div>' +
       '<div class="ans-grid">' + myAnsHtml + partnerAnsHtml + '</div>' +
-    '</div>';
+    '</div>' +
+    WAVE_SVG;
 }
 window.saveAnswer = function(){
   var ta = document.getElementById('newAnswer');
