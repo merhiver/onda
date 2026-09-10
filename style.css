@@ -158,6 +158,13 @@ main{flex:1; padding:4px 18px 96px; overflow-x:hidden;}
 .bucket-item .txt{flex:1; font-size:14.5px; line-height:1.5;}
 .bucket-item .txt.done{color:var(--ink-faint); text-decoration:line-through;}
 
+/* Kakao place search results */
+#placeResults:not(:empty){margin-top:8px; display:flex; flex-direction:column; gap:6px;}
+.place-result{display:block; width:100%; text-align:left; background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:8px 10px; cursor:pointer;}
+.place-result:hover{background:var(--surface-alt);}
+.place-result .pr-name{font-size:13.5px; font-weight:500; color:var(--ink);}
+.place-result .pr-addr{font-size:12px; margin-top:2px;}
+
 /* MESSAGES + QUESTION */
 /* dark feature card, deliberately theme-invariant (like a code block) */
 .q-card{background:#1c1c1c; border-radius:var(--radius-card); padding:18px; margin-bottom:18px;}

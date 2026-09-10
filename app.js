@@ -317,12 +317,11 @@ function renderBucket(){
   var isDate = state.bucketFilter === 'date';
   var addBar = isDate
     ? '<div class="stack" style="margin-bottom:16px;">' +
-        '<input class="input" id="newBucketText" placeholder="가보고 싶은 곳 이름" onkeydown="if(event.key===\'Enter\')addBucket()">' +
-        '<div class="row" style="gap:8px;">' +
-          '<button type="button" class="btn secondary" style="flex:1; font-size:13px;" onclick="openMapSearch(\'kakao\')">카카오맵에서 찾기 ↗</button>' +
-          '<button type="button" class="btn secondary" style="flex:1; font-size:13px;" onclick="openMapSearch(\'naver\')">네이버맵에서 찾기 ↗</button>' +
+        '<div class="composer">' +
+          '<input class="input" id="newBucketText" placeholder="장소 이름으로 검색 (예: 한강공원)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchPlace();}">' +
+          '<button type="button" class="btn secondary" onclick="searchPlace()">검색</button>' +
         '</div>' +
-        '<input class="input" id="newBucketMapUrl" placeholder="찾은 장소의 지도 링크 붙여넣기 (선택)">' +
+        '<div id="placeResults"></div>' +
         '<button class="btn block" onclick="addBucket()">추가</button>' +
       '</div>'
     : '<div class="composer" style="margin-bottom:16px;">' +
@@ -338,26 +337,65 @@ function renderBucket(){
     addBar +
     '<div class="card">' + listHtml + '</div>';
 }
-window.setBucketFilter = function(k){ state.bucketFilter = k; renderBucket(); };
-window.openMapSearch = function(which){
+window.setBucketFilter = function(k){ selectedPlace = null; state.bucketFilter = k; renderBucket(); };
+
+/* Kakao Places keyword search (real autocomplete, replaces the old "open new tab" flow) */
+var kakaoReady = false;
+var selectedPlace = null;
+var lastPlaceResults = [];
+function initKakao(){
+  if(window.kakao && window.kakao.maps && window.kakao.maps.load){
+    kakao.maps.load(function(){ kakaoReady = true; });
+  }
+}
+window.searchPlace = function(){
   var input = document.getElementById('newBucketText');
+  var box = document.getElementById('placeResults');
   var q = input ? input.value.trim() : '';
-  if(!q){ if(input) input.focus(); return; }
-  var url = which === 'kakao'
-    ? 'https://map.kakao.com/link/search/' + encodeURIComponent(q)
-    : 'https://map.naver.com/p/search/' + encodeURIComponent(q);
-  window.open(url, '_blank', 'noopener');
+  if(!box) return;
+  selectedPlace = null;
+  if(!q){ box.innerHTML = ''; return; }
+  if(!kakaoReady){
+    box.innerHTML = '<div class="faint">지도 검색을 불러오는 중이에요. 잠시 후 다시 시도해주세요.</div>';
+    return;
+  }
+  var places = new kakao.maps.services.Places();
+  places.keywordSearch(q, function(results, status){
+    if(status !== kakao.maps.services.Status.OK || !results.length){
+      box.innerHTML = '<div class="faint">검색 결과가 없어요.</div>';
+      return;
+    }
+    lastPlaceResults = results.slice(0, 5);
+    box.innerHTML = lastPlaceResults.map(function(r, i){
+      return '<button type="button" class="place-result" onclick="selectPlace(' + i + ')">' +
+        '<div class="pr-name">' + esc(r.place_name) + '</div>' +
+        '<div class="pr-addr faint">' + esc(r.road_address_name || r.address_name) + '</div>' +
+      '</button>';
+    }).join('');
+  });
+};
+window.selectPlace = function(i){
+  var r = lastPlaceResults[i];
+  if(!r) return;
+  selectedPlace = { name: r.place_name, address: (r.road_address_name || r.address_name), lat: r.y, lng: r.x };
+  var input = document.getElementById('newBucketText');
+  if(input) input.value = r.place_name;
+  var box = document.getElementById('placeResults');
+  if(box) box.innerHTML = '<div class="faint">선택됨 · ' + esc(selectedPlace.address) + '</div>';
 };
 window.addBucket = function(){
   var input = document.getElementById('newBucketText');
   var text = input.value.trim();
   if(!text || !dbApi) return;
   var data = {kind: state.bucketFilter, text: text, done:false, doneDate:null, author: ME, createdAt: Date.now()};
-  var urlInput = document.getElementById('newBucketMapUrl');
-  if(urlInput && urlInput.value.trim()) data.mapUrl = urlInput.value.trim();
+  if(state.bucketFilter === 'date' && selectedPlace && selectedPlace.name === text){
+    data.mapUrl = 'https://map.kakao.com/link/map/' + encodeURIComponent(selectedPlace.name) + ',' + selectedPlace.lat + ',' + selectedPlace.lng;
+  }
   dbApi.collection('bucket').add(data);
   input.value = '';
-  if(urlInput) urlInput.value = '';
+  selectedPlace = null;
+  var box = document.getElementById('placeResults');
+  if(box) box.innerHTML = '';
 };
 window.toggleBucket = function(id, wasDone){
   if(!dbApi) return;
@@ -463,6 +501,7 @@ async function boot(){
   if(!ME){ renderChooser(); return; }
   document.getElementById('overlayRoot').innerHTML = '';
   switchTab('home');
+  initKakao();
   try{
     var cfg = window.ONDA_CONFIG || {};
     if(!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1){
