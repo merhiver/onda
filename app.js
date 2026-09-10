@@ -141,7 +141,15 @@ function renderInfoTab(){
 }
 var THEMES = [
   { id:'wave', name:'웨이브', desc:'청록 + 코랄 바다 톤, 둥근 곡선', swatch:['#0ea5b7','#ff7a59','#eef7f7'] },
-  { id:'supabase', name:'미니멀', desc:'그린 포인트의 깔끔한 모노톤', swatch:['#3ecf8e','#171717','#fafafa'] }
+  { id:'supabase', name:'미니멀', desc:'그린 포인트의 깔끔한 모노톤', swatch:['#3ecf8e','#171717','#fafafa'] },
+  { id:'summer', name:'한여름', desc:'쨍한 햇살 노랑 + 깊은 바다색', swatch:['#ffb703','#023e8a','#fff8e8'] },
+  { id:'winter', name:'한겨울', desc:'얼어붙은 바다, 차가운 빙하 블루', swatch:['#4f7ca8','#16283a','#f2f7fa'] },
+  { id:'midnight', name:'심야', desc:'밤바다의 청록빛 야광, 항상 다크', swatch:['#2de6a8','#0a0a1a','#8886a8'] },
+  { id:'storm', name:'폭풍', desc:'전기빛 보라 + 번개 라임', swatch:['#6c63ff','#c6d94a','#1f2430'] },
+  { id:'coral-reef', name:'산호초', desc:'청록 산호 + 핫핑크', swatch:['#0fb894','#ff3d81','#eafbf6'] },
+  { id:'sea-salt', name:'소금', desc:'말린 소금처럼 차분한 무채색', swatch:['#6f8c99','#b99b8d','#f6f4f0'] },
+  { id:'high-tide', name:'밀물', desc:'짙은 바다초록 + 유목 갈색', swatch:['#147a6a','#c98a53','#f6ead9'] },
+  { id:'yunseul', name:'윤슬', desc:'물 위에 반짝이는 금빛 햇살', swatch:['#f2b544','#1c5d8c','#fdf6e6'] }
 ];
 function renderThemeTab(){
   var current = getAppTheme();

@@ -230,7 +230,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 #dateMap{width:100%; height:220px; border-radius:var(--radius-md); overflow:hidden; background:var(--surface-alt); margin-top:4px;}
 #dateMap .empty{padding:0; height:220px; display:flex; align-items:center; justify-content:center;}
 
-::selection{background:rgba(14,165,183,.28);}
+::selection{background:color-mix(in srgb, var(--primary) 28%, transparent);}
 
 /* ---- desktop layout (>=880px): sidebar nav + centered reading column ---- */
 .nav-brand{display:none;}
@@ -252,7 +252,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
     padding:10px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500;
   }
   .navbtn:hover{background:var(--surface-alt);}
-  .navbtn.active{background:rgba(14,165,183,.14); color:var(--primary-active);}
+  .navbtn.active{background:color-mix(in srgb, var(--primary) 14%, transparent); color:var(--primary-active);}
   .navbtn svg{width:19px; height:19px; flex:none;}
   .navbtn .dot{position:static; margin-left:auto;}
   main{flex:1 1 0%; min-width:0; width:100%; max-width:640px; margin:0 auto; padding:0 8px 60px 40px;}
@@ -346,6 +346,287 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 [data-app-theme="supabase"] .sheet h2,
 [data-app-theme="supabase"] .chat-head{font-family:var(--font-body); font-weight:600;}
 
-@media (min-width:880px){
-  [data-app-theme="supabase"] .navbtn.active{background:rgba(62,207,142,.12); color:var(--primary-active);}
+
+/* ====================================================================
+   8 additional selectable app themes (see Settings > 테마).
+   Each layers color/shape/font overrides on the wave base above —
+   flat colors only (no gradients), meaningful onda/water palettes.
+   ==================================================================== */
+
+/* 한여름 */
+[data-app-theme="summer"]{
+  --font-display:"Jua", var(--font-body);
 }
+[data-app-theme="summer"]{
+  --canvas:#fff8e8; --surface:#ffffff; --surface-alt:#fdeecb;
+  --ink:#2b2013; --ink-2:#4a3a20; --ink-muted:#8a7550; --ink-faint:#c9b98c;
+  --hairline:#f0e2c0;
+  --primary:#ffb703; --primary-active:#e6a300; --on-primary:#2b2013;
+  --coral:#0096c7;
+  --sky:#8a5a00; --sky-bg:#fff1cf; --pink-bg:#e0f4fb;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="summer"]:not([data-theme="light"]){
+    --canvas:#1c1608; --surface:#2a2210; --surface-alt:#352b15;
+    --ink:#fff3d6; --ink-2:#f0dfb0; --ink-muted:#b9a06a; --ink-faint:#7a6640;
+    --hairline:#453a1e;
+    --primary:#ffc93c; --primary-active:#ffd966; --on-primary:#241a00;
+    --coral:#48cae4;
+    --sky:#ffd166; --sky-bg:#4a3a10; --pink-bg:#123a4a;
+    }
+}
+[data-app-theme="summer"][data-theme="dark"]{
+  --canvas:#1c1608; --surface:#2a2210; --surface-alt:#352b15;
+  --ink:#fff3d6; --ink-2:#f0dfb0; --ink-muted:#b9a06a; --ink-faint:#7a6640;
+  --hairline:#453a1e;
+  --primary:#ffc93c; --primary-active:#ffd966; --on-primary:#241a00;
+  --coral:#48cae4;
+  --sky:#ffd166; --sky-bg:#4a3a10; --pink-bg:#123a4a;
+}
+[data-app-theme="summer"] .hero{background:#023e8a; color:#ffffff;}
+[data-app-theme="summer"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="summer"] .hero .dday{color:#ffd166;}
+[data-app-theme="summer"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="summer"] .q-card{background:#023e8a;}
+[data-app-theme="summer"] .q-card .q-label{color:#ffd166;}
+
+/* 한겨울 */
+[data-app-theme="winter"]{
+  --font-display:var(--font-body);
+}
+[data-app-theme="winter"]{
+  --canvas:#f2f7fa; --surface:#ffffff; --surface-alt:#e6eef3;
+  --ink:#16232c; --ink-2:#2c3e4a; --ink-muted:#66808f; --ink-faint:#a9bcc6;
+  --hairline:#dbe6ec;
+  --primary:#4f7ca8; --primary-active:#3d6389; --on-primary:#ffffff;
+  --coral:#9fd8e8;
+  --sky:#2c5878; --sky-bg:#e2f1f7; --pink-bg:#eef0f5;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="winter"]:not([data-theme="light"]){
+    --canvas:#0c1620; --surface:#132030; --surface-alt:#1b2b3d;
+    --ink:#eaf3f8; --ink-2:#cddce6; --ink-muted:#7f9aab; --ink-faint:#4f6575;
+    --hairline:#233648;
+    --primary:#7db4d9; --primary-active:#a3cde6; --on-primary:#0a1520;
+    --coral:#bfeaf5;
+    --sky:#a3cde6; --sky-bg:#1c3448; --pink-bg:#241e33;
+    }
+}
+[data-app-theme="winter"][data-theme="dark"]{
+  --canvas:#0c1620; --surface:#132030; --surface-alt:#1b2b3d;
+  --ink:#eaf3f8; --ink-2:#cddce6; --ink-muted:#7f9aab; --ink-faint:#4f6575;
+  --hairline:#233648;
+  --primary:#7db4d9; --primary-active:#a3cde6; --on-primary:#0a1520;
+  --coral:#bfeaf5;
+  --sky:#a3cde6; --sky-bg:#1c3448; --pink-bg:#241e33;
+}
+[data-app-theme="winter"] .hero{background:#132639; color:#ffffff;}
+[data-app-theme="winter"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="winter"] .hero .dday{color:#8fd6ea;}
+[data-app-theme="winter"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="winter"] .q-card{background:#132639;}
+[data-app-theme="winter"] .q-card .q-label{color:#8fd6ea;}
+
+/* 폭풍 */
+[data-app-theme="storm"]{
+  --font-display:var(--font-body);
+}
+[data-app-theme="storm"]{
+  --canvas:#eef0f3; --surface:#ffffff; --surface-alt:#e3e7ec;
+  --ink:#262b33; --ink-2:#3c4451; --ink-muted:#6b7280; --ink-faint:#a8b0ba;
+  --hairline:#d7dce2;
+  --primary:#6c63ff; --primary-active:#564bf0; --on-primary:#ffffff;
+  --coral:#c6d94a;
+  --sky:#4b3fd1; --sky-bg:#eae8ff; --pink-bg:#f2f5df;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="storm"]:not([data-theme="light"]){
+    --canvas:#14171d; --surface:#1c2029; --surface-alt:#242a35;
+    --ink:#eef0f3; --ink-2:#d3d8e0; --ink-muted:#7d8592; --ink-faint:#4d5563;
+    --hairline:#2c333f;
+    --primary:#8f88ff; --primary-active:#a9a3ff; --on-primary:#121225;
+    --coral:#d7e86a;
+    --sky:#a9a3ff; --sky-bg:#2a2650; --pink-bg:#333a1a;
+    }
+}
+[data-app-theme="storm"][data-theme="dark"]{
+  --canvas:#14171d; --surface:#1c2029; --surface-alt:#242a35;
+  --ink:#eef0f3; --ink-2:#d3d8e0; --ink-muted:#7d8592; --ink-faint:#4d5563;
+  --hairline:#2c333f;
+  --primary:#8f88ff; --primary-active:#a9a3ff; --on-primary:#121225;
+  --coral:#d7e86a;
+  --sky:#a9a3ff; --sky-bg:#2a2650; --pink-bg:#333a1a;
+}
+[data-app-theme="storm"] .hero{background:#1f2430; color:#ffffff;}
+[data-app-theme="storm"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="storm"] .hero .dday{color:#8f88ff;}
+[data-app-theme="storm"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="storm"] .q-card{background:#1f2430;}
+[data-app-theme="storm"] .q-card .q-label{color:#8f88ff;}
+
+/* 산호초 */
+[data-app-theme="coral-reef"]{
+  --font-display:"Jua", var(--font-body);
+}
+[data-app-theme="coral-reef"]{
+  --canvas:#eafbf6; --surface:#ffffff; --surface-alt:#d9f5ec;
+  --ink:#0c2b24; --ink-2:#1c4b3f; --ink-muted:#5a8079; --ink-faint:#9dc2b8;
+  --hairline:#cdeee2;
+  --primary:#0fb894; --primary-active:#0c9678; --on-primary:#ffffff;
+  --coral:#ff3d81;
+  --sky:#0c8a6f; --sky-bg:#d3f5ea; --pink-bg:#ffe1ec;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="coral-reef"]:not([data-theme="light"]){
+    --canvas:#06201a; --surface:#0c2c24; --surface-alt:#12392f;
+    --ink:#e3fbf3; --ink-2:#bdeee0; --ink-muted:#68a596; --ink-faint:#3d6b5f;
+    --hairline:#164435;
+    --primary:#2ee0b8; --primary-active:#5fe9c9; --on-primary:#052018;
+    --coral:#ff6fa3;
+    --sky:#5fe9c9; --sky-bg:#0e3d33; --pink-bg:#3a1c2b;
+    }
+}
+[data-app-theme="coral-reef"][data-theme="dark"]{
+  --canvas:#06201a; --surface:#0c2c24; --surface-alt:#12392f;
+  --ink:#e3fbf3; --ink-2:#bdeee0; --ink-muted:#68a596; --ink-faint:#3d6b5f;
+  --hairline:#164435;
+  --primary:#2ee0b8; --primary-active:#5fe9c9; --on-primary:#052018;
+  --coral:#ff6fa3;
+  --sky:#5fe9c9; --sky-bg:#0e3d33; --pink-bg:#3a1c2b;
+}
+[data-app-theme="coral-reef"] .hero{background:#0b4d43; color:#ffffff;}
+[data-app-theme="coral-reef"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="coral-reef"] .hero .dday{color:#ff6fa3;}
+[data-app-theme="coral-reef"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="coral-reef"] .q-card{background:#0b4d43;}
+[data-app-theme="coral-reef"] .q-card .q-label{color:#ff6fa3;}
+
+/* 소금 */
+[data-app-theme="sea-salt"]{
+  --font-display:var(--font-body);
+  --radius-card:14px; --radius-sm:8px; --radius-md:10px; --radius-xl:18px;
+}
+[data-app-theme="sea-salt"]{
+  --canvas:#f6f4f0; --surface:#ffffff; --surface-alt:#ece8e0;
+  --ink:#292c2e; --ink-2:#40444a; --ink-muted:#7a7f82; --ink-faint:#b6b2aa;
+  --hairline:#e2ded7;
+  --primary:#6f8c99; --primary-active:#597682; --on-primary:#ffffff;
+  --coral:#b99b8d;
+  --sky:#4c6570; --sky-bg:#e6edf0; --pink-bg:#efe6df;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="sea-salt"]:not([data-theme="light"]){
+    --canvas:#1c1c1c; --surface:#252525; --surface-alt:#2e2e2e;
+    --ink:#f2f0ec; --ink-2:#d6d2c8; --ink-muted:#9a9690; --ink-faint:#63605a;
+    --hairline:#3a3a38;
+    --primary:#8fadb8; --primary-active:#a8c3cc; --on-primary:#12181a;
+    --coral:#d4b6a6;
+    --sky:#a8c3cc; --sky-bg:#2c3a3e; --pink-bg:#352c26;
+    }
+}
+[data-app-theme="sea-salt"][data-theme="dark"]{
+  --canvas:#1c1c1c; --surface:#252525; --surface-alt:#2e2e2e;
+  --ink:#f2f0ec; --ink-2:#d6d2c8; --ink-muted:#9a9690; --ink-faint:#63605a;
+  --hairline:#3a3a38;
+  --primary:#8fadb8; --primary-active:#a8c3cc; --on-primary:#12181a;
+  --coral:#d4b6a6;
+  --sky:#a8c3cc; --sky-bg:#2c3a3e; --pink-bg:#352c26;
+}
+[data-app-theme="sea-salt"] .hero{background:#23282b; color:#ffffff;}
+[data-app-theme="sea-salt"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="sea-salt"] .hero .dday{color:#a8c3cc;}
+[data-app-theme="sea-salt"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="sea-salt"] .q-card{background:#23282b;}
+[data-app-theme="sea-salt"] .q-card .q-label{color:#a8c3cc;}
+
+/* 밀물 */
+[data-app-theme="high-tide"]{
+  --font-display:"Jua", var(--font-body);
+}
+[data-app-theme="high-tide"]{
+  --canvas:#f6ead9; --surface:#fffaf2; --surface-alt:#efdcc0;
+  --ink:#2b241c; --ink-2:#453a2b; --ink-muted:#7d7365; --ink-faint:#bcae98;
+  --hairline:#e6d7bf;
+  --primary:#147a6a; --primary-active:#106258; --on-primary:#ffffff;
+  --coral:#c98a53;
+  --sky:#0e5c50; --sky-bg:#d9ece7; --pink-bg:#f3e2cd;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="high-tide"]:not([data-theme="light"]){
+    --canvas:#191410; --surface:#231c15; --surface-alt:#2c2319;
+    --ink:#f3e9d8; --ink-2:#dfd0b4; --ink-muted:#a3917a; --ink-faint:#665a49;
+    --hairline:#382c1e;
+    --primary:#3ea592; --primary-active:#5fc0ac; --on-primary:#0a1a16;
+    --coral:#e0ab73;
+    --sky:#5fc0ac; --sky-bg:#173a33; --pink-bg:#3a2a18;
+    }
+}
+[data-app-theme="high-tide"][data-theme="dark"]{
+  --canvas:#191410; --surface:#231c15; --surface-alt:#2c2319;
+  --ink:#f3e9d8; --ink-2:#dfd0b4; --ink-muted:#a3917a; --ink-faint:#665a49;
+  --hairline:#382c1e;
+  --primary:#3ea592; --primary-active:#5fc0ac; --on-primary:#0a1a16;
+  --coral:#e0ab73;
+  --sky:#5fc0ac; --sky-bg:#173a33; --pink-bg:#3a2a18;
+}
+[data-app-theme="high-tide"] .hero{background:#0d4a40; color:#ffffff;}
+[data-app-theme="high-tide"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="high-tide"] .hero .dday{color:#e0ab73;}
+[data-app-theme="high-tide"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="high-tide"] .q-card{background:#0d4a40;}
+[data-app-theme="high-tide"] .q-card .q-label{color:#e0ab73;}
+
+/* 윤슬 */
+[data-app-theme="yunseul"]{
+  --font-display:"Jua", var(--font-body);
+}
+[data-app-theme="yunseul"]{
+  --canvas:#fdf6e6; --surface:#ffffff; --surface-alt:#faecc6;
+  --ink:#12283a; --ink-2:#26435a; --ink-muted:#5c7488; --ink-faint:#a4b7c4;
+  --hairline:#f0e2bd;
+  --primary:#f2b544; --primary-active:#dba02f; --on-primary:#12283a;
+  --coral:#1c5d8c;
+  --sky:#8a6a10; --sky-bg:#fbeec8; --pink-bg:#dceafa;
+}
+@media (prefers-color-scheme: dark){
+  [data-app-theme="yunseul"]:not([data-theme="light"]){
+    --canvas:#0e1a24; --surface:#152534; --surface-alt:#1c3040;
+    --ink:#fdf3dc; --ink-2:#eadcb8; --ink-muted:#a3946e; --ink-faint:#65593d;
+    --hairline:#2a3f52;
+    --primary:#f7cc6e; --primary-active:#fadb92; --on-primary:#1c1400;
+    --coral:#5b9cd6;
+    --sky:#fadb92; --sky-bg:#3a2f10; --pink-bg:#16304a;
+    }
+}
+[data-app-theme="yunseul"][data-theme="dark"]{
+  --canvas:#0e1a24; --surface:#152534; --surface-alt:#1c3040;
+  --ink:#fdf3dc; --ink-2:#eadcb8; --ink-muted:#a3946e; --ink-faint:#65593d;
+  --hairline:#2a3f52;
+  --primary:#f7cc6e; --primary-active:#fadb92; --on-primary:#1c1400;
+  --coral:#5b9cd6;
+  --sky:#fadb92; --sky-bg:#3a2f10; --pink-bg:#16304a;
+}
+[data-app-theme="yunseul"] .hero{background:#0d2b42; color:#ffffff;}
+[data-app-theme="yunseul"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="yunseul"] .hero .dday{color:#f2c869;}
+[data-app-theme="yunseul"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="yunseul"] .q-card{background:#0d2b42;}
+[data-app-theme="yunseul"] .q-card .q-label{color:#f2c869;}
+
+/* 심야 — deliberately always dark (night sea), no light-mode variant */
+[data-app-theme="midnight"]{
+  --font-display:var(--font-body);
+  --canvas:#0a0a1a; --surface:#14142b; --surface-alt:#1c1c3a;
+  --ink:#e8e6f5; --ink-2:#c7c3e8; --ink-muted:#8886a8; --ink-faint:#56547a;
+  --hairline:#2a2a4a;
+  --primary:#2de6a8; --primary-active:#1fc48e; --on-primary:#07120e;
+  --coral:#a8b8e0;
+  --sky:#8bf0c8; --sky-bg:#123830; --pink-bg:#241c3a;
+}
+[data-app-theme="midnight"] .hero{background:#050510; color:#ffffff;}
+[data-app-theme="midnight"] .hero .names{color:rgba(255,255,255,.85);}
+[data-app-theme="midnight"] .hero .dday{color:#2de6a8;}
+[data-app-theme="midnight"] .hero .annidate{color:rgba(255,255,255,.65);}
+[data-app-theme="midnight"] .q-card{background:#050510;}
+[data-app-theme="midnight"] .q-card .q-label{color:#2de6a8;}
+
