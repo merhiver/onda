@@ -80,7 +80,7 @@ main{flex:1; padding:4px 18px 96px; overflow-x:hidden;}
 .navbtn .dot{position:absolute; top:2px; right:22%; width:7px; height:7px; border-radius:50%; background:var(--primary); border:1.5px solid var(--surface);}
 
 /* generic card */
-.card{background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius-card); padding:16px; box-shadow:var(--shadow-1);}
+.card{background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius-card); padding:10px 14px; box-shadow:var(--shadow-1);}
 .stack{display:flex; flex-direction:column; gap:12px;}
 .row{display:flex; align-items:center; gap:10px;}
 
