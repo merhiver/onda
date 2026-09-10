@@ -44,6 +44,10 @@ function parseDate(s){ var p = s.split('-').map(Number); return new Date(p[0], p
 function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
 function dayOfYear(d){ var start = new Date(d.getFullYear(),0,0); return Math.floor((d - start) / 86400000); }
 function fmtDate(s){ var d = parseDate(s); return (d.getMonth()+1)+'월 '+d.getDate()+'일'; }
+function fmtDateTime(ms){
+  var d = new Date(ms);
+  return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+}
 function fmtDow(s){ return ['일','월','화','수','목','금','토'][parseDate(s).getDay()]; }
 function nameOf(who){
   if(!state.profile) return who === 'a' ? '1번' : '2번';
@@ -230,7 +234,7 @@ function renderCalendar(){
       '<div class="day-panel"><div class="section-title" style="margin-top:0;">' + fmtDate(state.selectedDay) + ' (' + fmtDow(state.selectedDay) + ')' + '</div>' +
       '<div class="card">' +
       (dayEvents.length ? dayEvents.map(function(e){
-        return '<div class="event-item"><span>' + esc(e.title) + '</span><button class="del" onclick="deleteEvent(\''+e.id+'\')" aria-label="삭제">✕</button></div>';
+        return '<div class="event-item"><span>' + esc(e.title) + ' <span class="faint">· ' + esc(nameOf(e.author)) + '</span></span><button class="del" onclick="deleteEvent(\''+e.id+'\')" aria-label="삭제">✕</button></div>';
       }).join('') : '<div class="empty">이 날 일정이 없어요</div>') +
       '</div>' +
       '<div class="composer" style="margin-top:10px;">' +
@@ -272,7 +276,7 @@ function renderRecord(){
     var canDelete = e.author === ME;
     return '<div class="entry"><div class="meta">' +
       '<span class="pill" style="background:var(--sky-bg); color:var(--sky);">' + esc(nameOf(e.author)) + '</span>' +
-      '<span class="faint tabular">' + fmtDate(e.date) + '</span>' +
+      '<span class="faint tabular">' + fmtDateTime(e.createdAt) + '</span>' +
       (canDelete ? '<button class="del" style="margin-left:auto;" onclick="deleteEntry(\''+e.id+'\')">✕</button>' : '') +
       '</div><div class="txt">' + esc(e.text) + '</div></div>';
   }).join('') : '<div class="empty">아직 기록이 없어요. 오늘 있었던 일을 남겨보세요</div>';
