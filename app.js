@@ -15,6 +15,15 @@ var ME = null, PARTNER = null;
   PARTNER = ME === 'a' ? 'b' : (ME === 'b' ? 'a' : null);
 })();
 
+/* ---------- app theme (per-browser, picked from Settings > 테마) ---------- */
+function getAppTheme(){
+  try{ return localStorage.getItem('onda_theme') || 'wave'; }catch(e){ return 'wave'; }
+}
+function applyAppTheme(id){
+  document.documentElement.setAttribute('data-app-theme', id);
+}
+applyAppTheme(getAppTheme());
+
 /* ---------- state ---------- */
 var state = {
   profile: null,           // {nameA, nameB, anniversary}
@@ -103,22 +112,58 @@ window.chooseIdentity = function(who){
 };
 
 /* ---------- settings / onboarding ---------- */
+var settingsTab = 'info';
 function openSettings(){
-  var p = state.profile || {};
-  document.getElementById('overlayRoot').innerHTML =
-    '<div class="overlay"><div class="sheet">' +
-      '<h2>두 사람 정보</h2>' +
-      '<p class="sub">이름과 사귄 날짜를 설정하면 홈에 디데이가 표시돼요. 둘 중 누가 저장해도 서로에게 바로 반영돼요.</p>' +
-      '<div class="field"><label>1번 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'"></div>' +
-      '<div class="field"><label>2번 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'"></div>' +
-      '<div class="field"><label>사귄 날짜</label><input class="input" id="setAnni" type="date" value="'+esc(p.anniversary||'')+'"></div>' +
-      '<div class="row" style="margin-top:14px;">' +
-        '<button class="btn secondary block" onclick="closeOverlay()">닫기</button>' +
-        '<button class="btn block" onclick="saveProfile()">저장</button>' +
-      '</div>' +
-    '</div></div>';
+  document.getElementById('overlayRoot').innerHTML = renderSettingsSheet();
 }
-function closeOverlay(){ document.getElementById('overlayRoot').innerHTML = ''; }
+function renderSettingsSheet(){
+  var tabsHtml = '<div class="seg" style="margin-bottom:16px;">' +
+      '<button class="' + (settingsTab==='info'?'active':'') + '" onclick="switchSettingsTab(\'info\')">두 사람 정보</button>' +
+      '<button class="' + (settingsTab==='theme'?'active':'') + '" onclick="switchSettingsTab(\'theme\')">테마</button>' +
+    '</div>';
+  var bodyHtml = settingsTab === 'theme' ? renderThemeTab() : renderInfoTab();
+  return '<div class="overlay"><div class="sheet"><h2>설정</h2>' + tabsHtml + bodyHtml + '</div></div>';
+}
+window.switchSettingsTab = function(t){
+  settingsTab = t;
+  document.getElementById('overlayRoot').innerHTML = renderSettingsSheet();
+};
+function renderInfoTab(){
+  var p = state.profile || {};
+  return '<p class="sub">이름과 사귄 날짜를 설정하면 홈에 디데이가 표시돼요. 둘 중 누가 저장해도 서로에게 바로 반영돼요.</p>' +
+    '<div class="field"><label>1번 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'"></div>' +
+    '<div class="field"><label>2번 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'"></div>' +
+    '<div class="field"><label>사귄 날짜</label><input class="input" id="setAnni" type="date" value="'+esc(p.anniversary||'')+'"></div>' +
+    '<div class="row" style="margin-top:14px;">' +
+      '<button class="btn secondary block" onclick="closeOverlay()">닫기</button>' +
+      '<button class="btn block" onclick="saveProfile()">저장</button>' +
+    '</div>';
+}
+var THEMES = [
+  { id:'wave', name:'웨이브', desc:'청록 + 코랄 바다 톤, 둥근 곡선', swatch:['#0ea5b7','#ff7a59','#eef7f7'] },
+  { id:'supabase', name:'미니멀', desc:'그린 포인트의 깔끔한 모노톤', swatch:['#3ecf8e','#171717','#fafafa'] }
+];
+function renderThemeTab(){
+  var current = getAppTheme();
+  return '<p class="sub">마음에 드는 테마를 골라보세요. 이 브라우저에만 적용돼요.</p>' +
+    '<div class="stack">' +
+    THEMES.map(function(o){
+      var active = current === o.id;
+      return '<button type="button" class="theme-opt' + (active?' active':'') + '" onclick="chooseTheme(\''+o.id+'\')">' +
+        '<span class="theme-swatch">' + o.swatch.map(function(c){ return '<span style="background:'+c+'"></span>'; }).join('') + '</span>' +
+        '<span class="theme-info"><span class="theme-name">' + esc(o.name) + '</span><span class="faint">' + esc(o.desc) + '</span></span>' +
+        (active ? '<span class="theme-check">✓</span>' : '') +
+      '</button>';
+    }).join('') +
+    '</div>' +
+    '<button class="btn secondary block" style="margin-top:14px;" onclick="closeOverlay()">닫기</button>';
+}
+window.chooseTheme = function(id){
+  try{ localStorage.setItem('onda_theme', id); }catch(e){}
+  applyAppTheme(id);
+  document.getElementById('overlayRoot').innerHTML = renderSettingsSheet();
+};
+function closeOverlay(){ document.getElementById('overlayRoot').innerHTML = ''; settingsTab = 'info'; }
 window.closeOverlay = closeOverlay;
 window.openSettings = openSettings;
 window.saveProfile = function(){
