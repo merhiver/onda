@@ -55,7 +55,7 @@ add("사이드바 대시보드", "좌측 고정 내비 + 통계 타일형 히어
   '.main{flex:1;padding:28px 32px;}' +
   '.stat-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:24px;}' +
   '.tile{background:#fff;border:1px solid #d3e7e8;border-radius:16px;padding:18px;}' +
-  '.tile.hero{background:linear-gradient(160deg,#17c2d1,#0a5a68 60%,#063542);color:#fff;}' +
+  '.tile.hero{background:#0a5a68;color:#fff;}' +
   '.tile .lbl{font-size:12px;color:#5c7d85;font-weight:600;}' +
   '.tile.hero .lbl{color:rgba(255,255,255,.7);}' +
   '.tile .num{font-size:30px;font-weight:700;margin-top:4px;}' +
@@ -123,7 +123,7 @@ add("아이콘 전용 레일", "64px 초슬림 아이콘 레일 + 가로형 슬�
   '.rail .ico{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:#7fa3aa;}' +
   '.rail .ico.on{background:#0ea5b7;color:#fff;}' +
   '.main{flex:1;padding:24px 30px;}' +
-  '.banner{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(100deg,#17c2d1,#0a5a68);color:#fff;border-radius:16px;padding:18px 26px;margin-bottom:22px;}' +
+  '.banner{display:flex;align-items:center;justify-content:space-between;background:#0a5a68;color:#fff;border-radius:16px;padding:18px 26px;margin-bottom:22px;}' +
   '.banner .names{font-size:13px;color:rgba(255,255,255,.8);}' +
   '.banner .dday{font-size:30px;font-weight:800;color:#ff9d7f;}' +
   '.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}' +
@@ -148,7 +148,7 @@ add("벤토 대시보드", "비균등 그리드 타일, D-day가 2x2로 지배",
   '.main{flex:1;padding:24px;}' +
   '.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,110px);gap:14px;}' +
   '.b{border-radius:16px;padding:16px;}' +
-  '.b1{grid-column:1/3;grid-row:1/3;background:linear-gradient(160deg,#17c2d1,#0a5a68 60%,#063542);color:#fff;display:flex;flex-direction:column;justify-content:center;}' +
+  '.b1{grid-column:1/3;grid-row:1/3;background:#0a5a68;color:#fff;display:flex;flex-direction:column;justify-content:center;}' +
   '.b1 .dday{font-size:36px;font-weight:800;color:#ff9d7f;}' +
   '.b2{grid-column:3/5;background:#fff;}' +
   '.b3{grid-column:3/4;background:#fff;}' +
@@ -242,7 +242,7 @@ add("타임라인 피드", "일정·기록을 한 줄기 타임라인으로 통�
   '.nav{display:flex;gap:20px;padding:16px 24px;border-bottom:1px solid #eef2f2;font-size:13px;font-weight:700;color:#5c7d85;}' +
   '.nav .on{color:#0a8494;}' +
   '.wrap{max-width:560px;margin:0 auto;padding:28px 24px;}' +
-  '.hero{background:linear-gradient(160deg,#17c2d1,#0a5a68);color:#fff;border-radius:18px;padding:20px 24px;margin-bottom:30px;}' +
+  '.hero{background:#0a5a68;color:#fff;border-radius:18px;padding:20px 24px;margin-bottom:30px;}' +
   '.hero .dday{font-size:34px;font-weight:800;color:#ff9d7f;}' +
   '.tl{position:relative;padding-left:22px;}' +
   '.tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:#d3e7e8;}' +
@@ -265,7 +265,7 @@ add("가로 스크롤 위젯", "월렛 스타일 위젯 행 + 하단 리스트",
   '.nav .on{color:#0a8494;}' +
   '.carousel{display:flex;gap:14px;padding:4px 28px 22px;overflow:hidden;}' +
   '.wcard{flex:none;width:180px;height:120px;border-radius:16px;padding:14px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;}' +
-  '.w1{background:linear-gradient(160deg,#17c2d1,#0a5a68);width:220px;}' +
+  '.w1{background:#0a5a68;width:220px;}' +
   '.w1 .num{font-size:28px;font-weight:800;color:#ff9d7f;}' +
   '.w2{background:#0ea5b7;} .w3{background:#0a2f3a;} .w4{background:#fff;color:#0b2f3a;border:1px solid #d3e7e8;}' +
   '.wcard .lbl{font-size:11px;opacity:.8;}' +
@@ -284,7 +284,7 @@ add("가로 스크롤 위젯", "월렛 스타일 위젯 행 + 하단 리스트",
 // ---- 11: Full-Bleed Hero ----
 add("풀블리드 히어로", "히어로가 프레임 끝까지 번짐, 그 위에 내비 오버레이", 980, 680,
   'body{background:#fff;color:#0b2f3a;}' +
-  '.hero{position:relative;background:linear-gradient(160deg,#17c2d1,#0a5a68 55%,#063542);color:#fff;padding:20px 32px 46px;}' +
+  '.hero{position:relative;background:#0a5a68;color:#fff;padding:20px 32px 46px;}' +
   '.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:60px;}' +
   '.nav .links{display:flex;gap:20px;font-size:13px;font-weight:700;color:rgba(255,255,255,.75);}' +
   '.nav .on{color:#fff;}' +
@@ -347,7 +347,7 @@ add("매거진 매소너리", "핀터레스트식 높이가 다른 카드 격자
   '.nav .on{color:#0a8494;}' +
   '.masonry{columns:3;column-gap:16px;padding:20px 26px;}' +
   '.card{break-inside:avoid;background:#f7fbfb;border-radius:14px;padding:16px;margin-bottom:16px;}' +
-  '.hero{background:linear-gradient(160deg,#17c2d1,#0a5a68);color:#fff;padding:26px 18px;}' +
+  '.hero{background:#0a5a68;color:#fff;padding:26px 18px;}' +
   '.hero .dday{font-size:32px;font-weight:800;color:#ff9d7f;}' +
   '.card .d{font-size:11px;color:#9dbcc2;}' +
   '.card .t{font-size:13.5px;margin-top:4px;line-height:1.5;}',
@@ -417,7 +417,7 @@ add("스크랩북", "폴라로이드 프레임 + 점선/회전으로 손맛, 폰
   '.p1{width:220px;transform:rotate(-2deg);}' +
   '.p2{width:200px;transform:rotate(1.5deg);margin-top:24px;}' +
   '.p3{width:200px;transform:rotate(-1deg);margin-top:6px;}' +
-  '.frame1{height:130px;background:linear-gradient(160deg,#17c2d1,#0a5a68);border-radius:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;}' +
+  '.frame1{height:130px;background:#0a5a68;border-radius:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;}' +
   '.frame1 .dday{font-size:30px;font-weight:800;color:#ffd7c4;}' +
   '.frame2{height:100px;background:#f3efe4;border:1px dashed #c9c1a8;border-radius:2px;padding:10px;font-size:12px;}' +
   '.cap{font-size:12px;color:#8a826a;margin-top:8px;text-align:center;}',
@@ -470,7 +470,7 @@ add("센터드 노 사이드바", "사이드바 없이 상단 알약 탭 + 좁�
 add("50/50 스플릿", "좌측 고정 히어로+내비, 우측 스크롤 리스트", 1000, 640,
   'body{background:#fff;color:#0b2f3a;}' +
   '.shell{display:flex;height:640px;}' +
-  '.left{width:50%;background:linear-gradient(160deg,#17c2d1,#0a5a68 60%,#063542);color:#fff;padding:32px;display:flex;flex-direction:column;justify-content:space-between;}' +
+  '.left{width:50%;background:#0a5a68;color:#fff;padding:32px;display:flex;flex-direction:column;justify-content:space-between;}' +
   '.left .dday{font-size:56px;font-weight:800;color:#ff9d7f;}' +
   '.left nav{display:flex;gap:16px;font-size:13px;font-weight:700;color:rgba(255,255,255,.7);}' +
   '.left nav .on{color:#fff;}' +
@@ -485,7 +485,7 @@ add("50/50 스플릿", "좌측 고정 히어로+내비, 우측 스크롤 리스�
 
 // ---- 21: Floating Glass Panels ----
 add("플로팅 글래스", "반투명 레이어 카드가 패턴 배경 위에 떠 있음", 980, 660,
-  'body{background:#0a5a68 radial-gradient(circle at 20% 20%,rgba(255,255,255,.08),transparent 40%),radial-gradient(circle at 80% 70%,rgba(255,255,255,.06),transparent 40%);color:#fff;}' +
+  'body{background:#0a5a68;color:#fff;}' +
   '.nav{display:flex;gap:18px;padding:18px 28px;font-size:13px;font-weight:700;color:rgba(255,255,255,.6);}' +
   '.nav .on{color:#fff;}' +
   '.wrap{padding:8px 28px 28px;}' +
@@ -506,7 +506,7 @@ add("균일 런처 그리드", "홈스크린 앱처럼 동일 크기 정사각 �
   '.nav{text-align:center;padding:18px 0;font-weight:700;}' +
   '.grid{display:grid;grid-template-columns:repeat(3,190px);grid-auto-rows:190px;gap:16px;justify-content:center;padding:10px 30px 30px;}' +
   '.tile{width:100%;height:100%;min-width:0;box-sizing:border-box;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:13px;font-weight:700;text-align:center;padding:8px;}' +
-  '.t1{background:linear-gradient(160deg,#17c2d1,#0a5a68);grid-column:span 2;}' +
+  '.t1{background:#0a5a68;grid-column:span 2;}' +
   '.t1 .dday{font-size:26px;}' +
   '.t2{background:#0ea5b7;} .t3{background:#ff9d7f;} .t4{background:#0b2f3a;} .t5{background:#fff;color:#0b2f3a;border:1px solid #d3e7e8;}',
   '<div class="nav">🌊 onda</div><div class="grid">' +
@@ -523,7 +523,7 @@ add("균일 런처 그리드", "홈스크린 앱처럼 동일 크기 정사각 �
 add("히어로형 사이드바", "세로로 긴 히어로 자체가 사이드바", 1000, 660,
   'body{background:#fff;color:#0b2f3a;}' +
   '.shell{display:flex;min-height:660px;}' +
-  '.hero{width:260px;flex:none;background:linear-gradient(200deg,#17c2d1,#0a5a68 55%,#063542);color:#fff;padding:26px 22px;display:flex;flex-direction:column;justify-content:space-between;}' +
+  '.hero{width:260px;flex:none;background:#0a5a68;color:#fff;padding:26px 22px;display:flex;flex-direction:column;justify-content:space-between;}' +
   '.hero nav{display:flex;flex-direction:column;gap:4px;}' +
   '.hero nav a{padding:9px 10px;border-radius:9px;font-size:13px;font-weight:700;color:rgba(255,255,255,.65);display:flex;gap:8px;align-items:center;}' +
   '.hero nav a.on{background:rgba(255,255,255,.15);color:#fff;}' +
@@ -587,7 +587,7 @@ add("하단 툴바 + 드로어", "내비는 접힌 드로어, 하단에 빠른 �
   '.top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;}' +
   '.burger{width:34px;height:34px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;}' +
   '.wrap{padding:0 20px;}' +
-  '.hero{background:linear-gradient(160deg,#17c2d1,#0a5a68);color:#fff;border-radius:18px;padding:22px;text-align:center;margin-bottom:20px;}' +
+  '.hero{background:#0a5a68;color:#fff;border-radius:18px;padding:22px;text-align:center;margin-bottom:20px;}' +
   '.hero .dday{font-size:38px;font-weight:800;color:#ff9d7f;}' +
   'h3{font-size:12px;color:#5c7d85;margin:18px 0 8px;}' +
   '.row{display:flex;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:13px;}' +
@@ -628,7 +628,7 @@ add("인피니트 캔버스", "카드들을 자유 배치하고 선으로 연결
   '.nav .on{color:#0a8494;}' +
   '.canvas{position:relative;height:560px;}' +
   '.node{position:absolute;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 8px 20px rgba(11,63,74,.1);width:180px;}' +
-  '.node.hero{background:linear-gradient(160deg,#17c2d1,#0a5a68);color:#fff;top:210px;left:400px;width:200px;}' +
+  '.node.hero{background:#0a5a68;color:#fff;top:210px;left:400px;width:200px;}' +
   '.node.hero .dday{font-size:26px;font-weight:800;color:#ff9d7f;}' +
   '.n1{top:60px;left:120px;} .n2{top:80px;left:660px;} .n3{top:380px;left:150px;} .n4{top:400px;left:640px;}' +
   '.node h4{font-size:11px;color:#9dbcc2;margin:0 0 4px;}' +
