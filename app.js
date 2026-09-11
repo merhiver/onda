@@ -264,14 +264,13 @@ function renderHeroBlock(){
   }
   var names = p ? (esc(p.nameA||'1번') + '  ·  ' + esc(p.nameB||'2번')) : '설정 전';
   el.innerHTML =
-    '<div class="nav-brand" style="display:flex;">🌊 onda</div>' +
-    '<div class="hero ocean-card" style="margin-bottom:14px;"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
     '<nav class="hero-block-nav">' +
       ['home','calendar','record','bucket','question'].map(function(t){
         var labels = {home:'홈', calendar:'캘린더', record:'기록', bucket:'버킷', question:'질문'};
         return '<button class="navbtn' + (tab===t?' active':'') + '" onclick="switchTab(\''+t+'\')">' + esc(labels[t]) + '</button>';
       }).join('') +
-    '</nav>';
+    '</nav>' +
+    '<div class="hero"><div class="names">' + names + '</div>' + ddayHtml + '</div>';
 }
 
 /* ---------- layout preview widgets (see PREVIEW_MODE above) ---------- */
@@ -356,7 +355,7 @@ function renderHome(){
     '<div class="card">' + upcomingHtml + '</div>' +
     '<div class="section-title">최근 기록</div>' +
     recentHtml;
-  if(PREVIEW_MODE === 'grid'){
+  if(PREVIEW_MODE === 'grid' || LAYOUT_MODE === 'c01' || LAYOUT_MODE === 'c11' || LAYOUT_MODE === 'c23'){
     listsHtml = '<div class="home-2col">' +
       '<div><div class="section-title">다가오는 일정</div><div class="card">' + upcomingHtml + '</div></div>' +
       '<div><div class="section-title">최근 기록</div>' + recentHtml + '</div>' +

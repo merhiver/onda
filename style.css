@@ -299,9 +299,19 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 .hero-block-nav{display:flex; flex-direction:column; gap:2px;}
 
 @media (min-width:880px){
-  /* c01 — stat-tile hero row */
+  /* shared: the 9 chosen concepts use flat hero color, never the default gradient */
+  [data-layout="c01"] .ocean-card, [data-layout="c02"] .ocean-card, [data-layout="c06"] .ocean-card,
+  [data-layout="c07"] .ocean-card, [data-layout="c11"] .ocean-card, [data-layout="c15"] .ocean-card,
+  [data-layout="c19"] .ocean-card, [data-layout="c20"] .ocean-card, [data-layout="c23"] .ocean-card{
+    background:var(--primary-active);
+  }
+
+  /* c01 — stat-tile hero row: dday tile shrinks to a label + number, lists sit side by side */
   [data-layout="c01"] .stat-tiles{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:14px;}
-  [data-layout="c01"] .stat-tile-hero{margin:0;}
+  [data-layout="c01"] .stat-tile-hero{margin:0; text-align:left; padding:18px;}
+  [data-layout="c01"] .stat-tile-hero::before{content:"디데이"; display:block; font-size:12px; font-weight:600; color:rgba(255,255,255,.7);}
+  [data-layout="c01"] .stat-tile-hero .names, [data-layout="c01"] .stat-tile-hero .annidate{display:none;}
+  [data-layout="c01"] .stat-tile-hero .dday{margin:4px 0 0; font-size:34px;}
   [data-layout="c01"] .stat-tile{margin:0; display:flex; flex-direction:column; justify-content:center; gap:6px;}
   [data-layout="c01"] .stat-tile .stat-num{font-size:26px;}
 
@@ -313,19 +323,23 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c02"] main{max-width:600px; margin:0 auto; padding:0 8px 60px;}
   [data-layout="c02"] #topbar{padding:0 8px 8px; justify-content:flex-end;}
   [data-layout="c02"] #topbarWord{display:none;}
-  [data-layout="c02"] .hero{background:transparent; border:none; box-shadow:none; padding:28px 0 0;}
+  [data-layout="c02"] .hero{background:transparent; border:none; box-shadow:none; padding:40px 0 0;}
   [data-layout="c02"] .hero .names{color:var(--ink-muted);}
-  [data-layout="c02"] .hero .dday{font-size:64px; color:var(--primary);}
+  [data-layout="c02"] .hero .dday{font-size:72px; color:var(--primary);}
   [data-layout="c02"] .hero .annidate{color:var(--ink-faint);}
   [data-layout="c02"] .wave-deco{display:none;}
   [data-layout="c02"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
 
-  /* c06 — chat-app shell: avatar-style nav icons, dotted main bg */
+  /* c06 — chat-app shell: avatar-style nav icons, dotted main bg, dday as a chat bubble */
   [data-layout="c06"] .navbtn svg{background:var(--primary); color:var(--on-primary); border-radius:50%; padding:5px; width:29px; height:29px; box-sizing:border-box;}
   [data-layout="c06"] .navbtn.active svg{background:var(--primary-active);}
   [data-layout="c06"] main{background-image:radial-gradient(var(--hairline) 1px, transparent 1px); background-size:18px 18px;}
+  [data-layout="c06"] #panel-home .hero{max-width:420px; text-align:left; padding:16px 20px; border-radius:var(--radius-card) var(--radius-card) var(--radius-card) 4px;}
+  [data-layout="c06"] #panel-home .hero .names, [data-layout="c06"] #panel-home .hero .annidate{font-size:12px;}
+  [data-layout="c06"] #panel-home .card{border:none; box-shadow:var(--shadow-1); border-radius:var(--radius-card) var(--radius-card) var(--radius-card) 4px;}
 
-  /* c07 — journal: no cards, no icons, minimal top text links */
+  /* c07 — journal: cream paper canvas, ink typography, no cards, no icons */
+  :root[data-layout="c07"]{--canvas:#fdfbf6; --ink:#20221f; --ink-muted:#8a8676; --ink-faint:#a6a294; --hairline:#ece7d8;}
   [data-layout="c07"] #nav{position:static; width:auto; flex:0 0 100%; order:-1; flex-direction:row; gap:22px; justify-content:flex-start; background:transparent; box-shadow:none; border-radius:0; padding:26px 8px 18px;}
   [data-layout="c07"] .nav-brand{display:none;}
   [data-layout="c07"] .navbtn{flex-direction:row; padding:0; font-size:13px; color:var(--ink-muted); border-radius:0;}
@@ -336,48 +350,71 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c07"] #topbar{padding:0 8px 4px;}
   [data-layout="c07"] .hero{background:transparent; border:none; box-shadow:none; padding:8px 0 20px; text-align:left;}
   [data-layout="c07"] .hero .names{color:var(--ink-muted);}
-  [data-layout="c07"] .hero .dday{font-size:48px; color:var(--primary);}
+  [data-layout="c07"] .hero .dday{font-size:48px; color:var(--ink); font-weight:800;}
   [data-layout="c07"] .hero .annidate{color:var(--ink-faint);}
   [data-layout="c07"] .wave-deco{display:none;}
   [data-layout="c07"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
   [data-layout="c07"] .card.stack{gap:10px;}
 
-  /* c11 — full-bleed hero, breaks out of main's side padding */
+  /* c11 — full-bleed hero merges with the topbar, cards overlap up into it, lists side by side */
+  [data-layout="c11"] #topbar{background:var(--ink); color:#fff; padding-bottom:0; margin-bottom:0;}
+  [data-layout="c11"] #topbarWord{color:#fff;}
+  [data-layout="c11"] #gear{color:rgba(255,255,255,.75);}
   [data-layout="c11"] main{padding-top:0;}
   [data-layout="c11"] #panel-home .hero{margin:0 -8px 0 -40px; border-radius:0; padding:40px 40px 46px;}
   [data-layout="c11"] #panel-home .wave-deco{margin-left:-40px; margin-right:-8px; width:calc(100% + 48px);}
+  [data-layout="c11"] #panel-home .card{box-shadow:var(--shadow-2);}
+  [data-layout="c11"] #panel-home .home-2col{margin-top:-22px; position:relative;}
 
-  /* c15 — persistent quick-add bar + pill nav below it */
+  /* c15 — persistent quick-add bar + pill nav, dday shrinks to a flat label/value row */
   [data-layout="c15"] #quickAdd{display:flex; flex:0 0 100%; order:-3; margin:0 8px 8px 40px;}
   [data-layout="c15"] #nav{position:static; width:auto; flex:0 0 100%; order:-2; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 16px; max-width:480px;}
   [data-layout="c15"] .nav-brand{display:none;}
   [data-layout="c15"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
   [data-layout="c15"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
+  [data-layout="c15"] #panel-home .hero{background:var(--surface); border:1px solid var(--hairline); box-shadow:none; display:flex; align-items:center; justify-content:space-between; padding:16px 20px; text-align:left;}
+  [data-layout="c15"] #panel-home .hero::before{content:"우리의 디데이"; font-size:14px; font-weight:500; color:var(--ink);}
+  [data-layout="c15"] #panel-home .hero .names, [data-layout="c15"] #panel-home .hero .annidate{display:none;}
+  [data-layout="c15"] #panel-home .hero .dday{margin:0; font-size:26px; color:var(--primary);}
 
-  /* c19 — centered, no sidebar, pill tabs */
+  /* c19 — centered, no sidebar, pill tabs, flat white dday card */
   [data-layout="c19"] #nav{position:static; width:auto; flex:0 0 100%; order:-1; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 20px; max-width:480px;}
   [data-layout="c19"] .nav-brand{display:none;}
   [data-layout="c19"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
   [data-layout="c19"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
   [data-layout="c19"] main{max-width:520px; margin:0 auto; padding:0 8px 60px;}
+  [data-layout="c19"] #panel-home .hero{background:var(--surface); box-shadow:var(--shadow-1);}
+  [data-layout="c19"] #panel-home .hero .names{color:var(--ink);}
+  [data-layout="c19"] #panel-home .hero .dday{color:var(--primary);}
+  [data-layout="c19"] #panel-home .hero .annidate{color:var(--ink-faint);}
 
-  /* c20 — 50/50 split: persistent left hero+nav panel, scrollable right */
+  /* c20 — 50/50 split: full-height solid dark left panel (nav on top, dday pinned to bottom) */
+  [data-layout="c20"] #shell{align-items:stretch;}
   [data-layout="c20"] #nav{display:none;}
   [data-layout="c20"] #heroBlock{
-    display:flex; flex-direction:column; width:34%; flex:none;
-    background:var(--surface); border-radius:var(--radius-xl); box-shadow:var(--shadow-1);
-    padding:16px 12px; position:sticky; top:32px;
+    display:flex; flex-direction:column; justify-content:space-between; align-self:stretch;
+    width:34%; flex:none; background:var(--primary-active); color:#fff;
+    border-radius:var(--radius-xl); box-shadow:none; padding:24px 20px; position:sticky; top:32px;
   }
+  [data-layout="c20"] #heroBlock .hero{background:transparent; box-shadow:none; padding:0; text-align:left;}
+  [data-layout="c20"] #heroBlock .navbtn{color:rgba(255,255,255,.65); font-weight:700; border-radius:9px;}
+  [data-layout="c20"] #heroBlock .navbtn:hover{background:rgba(255,255,255,.1);}
+  [data-layout="c20"] #heroBlock .navbtn.active{background:rgba(255,255,255,.16); color:#fff;}
   [data-layout="c20"] main{flex:1; max-width:none; margin:0; padding:0 8px 60px 24px;}
   [data-layout="c20"] #topbar{padding:0 8px 20px calc(34% + 24px);}
 
-  /* c23 — narrow hero-as-sidebar, same panel reused at fixed width */
+  /* c23 — narrow hero-as-sidebar, same treatment at a fixed width */
+  [data-layout="c23"] #shell{align-items:stretch;}
   [data-layout="c23"] #nav{display:none;}
   [data-layout="c23"] #heroBlock{
-    display:flex; flex-direction:column; width:240px; flex:none;
-    background:var(--surface); border-radius:var(--radius-xl); box-shadow:var(--shadow-1);
-    padding:16px 12px; position:sticky; top:32px;
+    display:flex; flex-direction:column; justify-content:space-between; align-self:stretch;
+    width:240px; flex:none; background:var(--primary-active); color:#fff;
+    border-radius:var(--radius-xl); box-shadow:none; padding:24px 18px; position:sticky; top:32px;
   }
+  [data-layout="c23"] #heroBlock .hero{background:transparent; box-shadow:none; padding:0; text-align:left;}
+  [data-layout="c23"] #heroBlock .navbtn{color:rgba(255,255,255,.65); font-weight:700; border-radius:9px;}
+  [data-layout="c23"] #heroBlock .navbtn:hover{background:rgba(255,255,255,.1);}
+  [data-layout="c23"] #heroBlock .navbtn.active{background:rgba(255,255,255,.16); color:#fff;}
   [data-layout="c23"] main{flex:1; max-width:640px; margin:0; padding:0 8px 60px 24px;}
   [data-layout="c23"] #topbar{padding:0 8px 20px calc(240px + 24px);}
 
