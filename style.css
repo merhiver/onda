@@ -297,6 +297,10 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 .quickadd-input{flex:1; border:none; background:none; font-size:14px; color:var(--ink); outline:none; font-family:inherit;}
 .hero-block{display:none;}
 .hero-block-nav{display:flex; flex-direction:column; gap:2px;}
+/* transparent by default — #nav behaves as a direct flex child of #shell exactly
+   as before; c15/c19 turn this into the real flex item instead (see below), so
+   #nav's own max-width can't get clamped during #shell's line-wrap fitting */
+#navWrap{display:contents;}
 
 @media (min-width:880px){
   /* shared: the 9 chosen concepts use flat hero color, never the default gradient */
@@ -306,7 +310,10 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
     background:var(--primary-active);
   }
 
-  /* c01 — stat-tile hero row: dday tile shrinks to a label + number, lists sit side by side */
+  /* c01 — sidebar dashboard: nav sits LEFT of main (gallery has nav first in the row) */
+  [data-layout="c01"] #topbar{order:-2;}
+  [data-layout="c01"] #nav{order:-1;}
+  [data-layout="c01"] #shell:has(#panel-home.active) #topbarWord{display:none;}
   [data-layout="c01"] .stat-tiles{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:14px;}
   [data-layout="c01"] .stat-tile-hero{margin:0; text-align:left; padding:18px;}
   [data-layout="c01"] .stat-tile-hero::before{content:"디데이"; display:block; font-size:12px; font-weight:600; color:rgba(255,255,255,.7);}
@@ -330,7 +337,10 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c02"] .wave-deco{display:none;}
   [data-layout="c02"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
 
-  /* c06 — chat-app shell: avatar-style nav icons, dotted main bg, dday as a chat bubble */
+  /* c06 — chat-app shell: nav is a LEFT-side conversation list (gallery has nav first in the row) */
+  [data-layout="c06"] #topbar{order:-2;}
+  [data-layout="c06"] #nav{order:-1;}
+  [data-layout="c06"] #shell:has(#panel-home.active) #topbarWord{display:none;}
   [data-layout="c06"] .navbtn svg{background:var(--primary); color:var(--on-primary); border-radius:50%; padding:5px; width:29px; height:29px; box-sizing:border-box;}
   [data-layout="c06"] .navbtn.active svg{background:var(--primary-active);}
   [data-layout="c06"] main{background-image:radial-gradient(var(--hairline) 1px, transparent 1px); background-size:18px 18px;}
@@ -347,7 +357,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c07"] .navbtn .dot{position:static;}
   [data-layout="c07"] .navbtn.active{background:none; color:var(--ink); text-decoration:underline; text-underline-offset:4px;}
   [data-layout="c07"] main{max-width:560px; margin:0 auto; padding:0 8px 60px;}
-  [data-layout="c07"] #topbar{padding:0 8px 4px;}
+  [data-layout="c07"] #topbar{order:-2; padding:0 8px 4px;}
   [data-layout="c07"] .hero{background:transparent; border:none; box-shadow:none; padding:8px 0 20px; text-align:left;}
   [data-layout="c07"] .hero .names{color:var(--ink-muted);}
   [data-layout="c07"] .hero .dday{font-size:48px; color:var(--ink); font-weight:800;}
@@ -356,10 +366,21 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c07"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
   [data-layout="c07"] .card.stack{gap:10px;}
 
-  /* c11 — full-bleed hero merges with the topbar, cards overlap up into it, lists side by side */
-  [data-layout="c11"] #topbar{background:var(--ink); color:#fff; padding-bottom:0; margin-bottom:0;}
+  /* c11 — full-bleed hero: nav is a horizontal row merged into the dark band, not a right sidebar */
+  [data-layout="c11"] #topbar{order:-2; background:var(--ink); color:#fff; padding-bottom:0; margin-bottom:0;}
   [data-layout="c11"] #topbarWord{color:#fff;}
   [data-layout="c11"] #gear{color:rgba(255,255,255,.75);}
+  [data-layout="c11"] .nav-brand{display:none;}
+  [data-layout="c11"] #nav{
+    position:static; width:auto; flex:0 0 100%; order:-1;
+    flex-direction:row; justify-content:flex-end; gap:20px;
+    background:var(--ink); box-shadow:none; border-radius:0; padding:0 8px 20px 40px;
+  }
+  [data-layout="c11"] .navbtn{flex-direction:row; padding:0; font-size:13px; font-weight:700; color:rgba(255,255,255,.75);}
+  [data-layout="c11"] .navbtn svg{display:none;}
+  [data-layout="c11"] .navbtn:hover{background:none;}
+  [data-layout="c11"] .navbtn.active{background:none; color:#fff;}
+  [data-layout="c11"] .navbtn .dot{position:static; margin-left:4px;}
   [data-layout="c11"] main{padding-top:0;}
   [data-layout="c11"] #panel-home .hero{margin:0 -8px 0 -40px; border-radius:0; padding:40px 40px 46px;}
   [data-layout="c11"] #panel-home .wave-deco{margin-left:-40px; margin-right:-8px; width:calc(100% + 48px);}
@@ -367,8 +388,13 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c11"] #panel-home .home-2col{margin-top:-22px; position:relative;}
 
   /* c15 — persistent quick-add bar + pill nav, dday shrinks to a flat label/value row */
+  [data-layout="c15"] #topbar{order:-4;}
   [data-layout="c15"] #quickAdd{display:flex; flex:0 0 100%; order:-3; margin:0 8px 8px 40px;}
-  [data-layout="c15"] #nav{position:static; width:auto; flex:0 0 100%; order:-2; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 16px; max-width:480px;}
+  /* #nav's own max-width clamps its line-fitting size inside #shell, so it can end up
+     sharing a row with main instead of getting one to itself — #navWrap (unclamped)
+     becomes the real flex item here instead, #nav just centers inside it as normal block flow */
+  [data-layout="c15"] #navWrap{display:block; flex:0 0 100%; order:-2;}
+  [data-layout="c15"] #nav{width:auto; display:flex; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 16px; max-width:480px;}
   [data-layout="c15"] .nav-brand{display:none;}
   [data-layout="c15"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
   [data-layout="c15"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
@@ -378,7 +404,10 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c15"] #panel-home .hero .dday{margin:0; font-size:26px; color:var(--primary);}
 
   /* c19 — centered, no sidebar, pill tabs, flat white dday card */
-  [data-layout="c19"] #nav{position:static; width:auto; flex:0 0 100%; order:-1; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 20px; max-width:480px;}
+  [data-layout="c19"] #topbar{order:-2; justify-content:center; position:relative;}
+  [data-layout="c19"] #gear{position:absolute; right:8px;}
+  [data-layout="c19"] #navWrap{display:block; flex:0 0 100%; order:-1;}
+  [data-layout="c19"] #nav{width:auto; display:flex; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 20px; max-width:480px;}
   [data-layout="c19"] .nav-brand{display:none;}
   [data-layout="c19"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
   [data-layout="c19"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
