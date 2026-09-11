@@ -383,14 +383,14 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c07"] .card.stack{gap:10px;}
 
   /* c11 — full-bleed hero: nav is a horizontal row merged into the dark band, not a right sidebar */
-  :root[data-layout="c11"] #topbar{order:-2; background:var(--ink); color:#fff; padding-bottom:0; margin-bottom:0;}
+  :root[data-layout="c11"] #topbar{order:-2; background:var(--primary-active); color:#fff; padding-bottom:0; margin-bottom:0;}
   :root[data-layout="c11"] #topbarWord{color:#fff;}
   :root[data-layout="c11"] #gear{color:rgba(255,255,255,.75);}
   :root[data-layout="c11"] .nav-brand{display:none;}
   :root[data-layout="c11"] #nav{
     position:static; width:auto; flex:0 0 100%; order:-1;
     flex-direction:row; justify-content:flex-end; gap:20px;
-    background:var(--ink); box-shadow:none; border-radius:0; padding:0 8px 20px 40px;
+    background:var(--primary-active); box-shadow:none; border-radius:0; padding:0 8px 20px 40px;
   }
   :root[data-layout="c11"] .navbtn{flex-direction:row; padding:0; font-size:13px; font-weight:700; color:rgba(255,255,255,.75);}
   :root[data-layout="c11"] .navbtn svg{display:none;}
@@ -399,7 +399,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c11"] .navbtn .dot{position:static; margin-left:4px;}
   :root[data-layout="c11"] main{padding-top:0;}
   :root[data-layout="c11"] #panel-home .hero{margin:0 -8px 0 -40px; border-radius:0; padding:40px 40px 46px;}
-  :root[data-layout="c11"] #panel-home .wave-deco{margin-left:-40px; margin-right:-8px; width:calc(100% + 48px);}
+  :root[data-layout="c11"] #panel-home .wave-deco{display:none;}
   :root[data-layout="c11"] #panel-home .card{box-shadow:var(--shadow-2);}
   :root[data-layout="c11"] #panel-home .home-2col{margin-top:-22px; position:relative;}
 
