@@ -235,6 +235,21 @@ function updateBadge(){
   if(qDot) qDot.hidden = !(partnerAnsweredToday && !iAnsweredToday);
 }
 
+/* ---------- c06 nav subtitle (conversation-list "last message" line) ---------- */
+function renderNavSub(){
+  if(LAYOUT_MODE !== 'c06') return;
+  var p = state.profile;
+  var homeSub = '최근 소식 있음';
+  if(p && p.anniversary){
+    var days = Math.floor((startOfDay(new Date()) - startOfDay(parseDate(p.anniversary))) / 86400000) + 1;
+    homeSub = '디데이 D+' + days;
+  }
+  var subs = {home:homeSub, calendar:'최근 소식 있음', record:'최근 소식 있음', bucket:'최근 소식 있음', question:'최근 소식 있음'};
+  document.querySelectorAll('.navbtn').forEach(function(btn){
+    btn.setAttribute('data-sub', subs[btn.dataset.tab] || '');
+  });
+}
+
 /* ---------- render dispatch ---------- */
 function renderAll(){
   renderHome();
@@ -244,6 +259,7 @@ function renderAll(){
   renderQuestion();
   renderChat();
   renderSideWidget();
+  renderNavSub();
   renderHeroBlock();
   updateBadge();
 }

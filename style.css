@@ -341,8 +341,24 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   [data-layout="c06"] #topbar{order:-2;}
   [data-layout="c06"] #nav{order:-1;}
   [data-layout="c06"] #shell:has(#panel-home.active) #topbarWord{display:none;}
-  [data-layout="c06"] .navbtn svg{background:var(--primary); color:var(--on-primary); border-radius:50%; padding:5px; width:29px; height:29px; box-sizing:border-box;}
-  [data-layout="c06"] .navbtn.active svg{background:var(--primary-active);}
+  /* nav rows read like a conversation list: letter-avatar + title line + "last message" subtitle */
+  [data-layout="c06"] .navbtn{flex-wrap:wrap; align-items:center; text-align:left; padding:8px 10px; font-weight:600;}
+  [data-layout="c06"] .navbtn svg{display:none;}
+  [data-layout="c06"] .navbtn::before{
+    content:"?"; width:34px; height:34px; flex:none; border-radius:50%; margin-right:10px;
+    background:var(--primary); color:var(--on-primary); font-size:14px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  [data-layout="c06"] .navbtn.active::before{background:var(--primary-active);}
+  [data-layout="c06"] .navbtn[data-tab="home"]::before{content:"홈";}
+  [data-layout="c06"] .navbtn[data-tab="calendar"]::before{content:"캘";}
+  [data-layout="c06"] .navbtn[data-tab="record"]::before{content:"기";}
+  [data-layout="c06"] .navbtn[data-tab="bucket"]::before{content:"버";}
+  [data-layout="c06"] .navbtn[data-tab="question"]::before{content:"질";}
+  [data-layout="c06"] .navbtn::after{
+    content:attr(data-sub); flex-basis:100%; margin-left:44px;
+    font-size:11px; font-weight:400; color:var(--ink-faint);
+  }
   [data-layout="c06"] main{background-image:radial-gradient(var(--hairline) 1px, transparent 1px); background-size:18px 18px;}
   [data-layout="c06"] #panel-home .hero{max-width:420px; text-align:left; padding:16px 20px; border-radius:var(--radius-card) var(--radius-card) var(--radius-card) 4px;}
   [data-layout="c06"] #panel-home .hero .names, [data-layout="c06"] #panel-home .hero .annidate{font-size:12px;}
