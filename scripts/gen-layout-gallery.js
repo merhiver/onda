@@ -730,22 +730,26 @@ var out = [];
 out.push('<!doctype html><html lang="ko"><head><meta charset="utf-8">');
 out.push('<meta name="viewport" content="width=device-width, initial-scale=1">');
 out.push('<title>온다 레이아웃 갤러리</title>');
-out.push('<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">');
+out.push('<link rel="preconnect" href="https://fonts.googleapis.com">');
+out.push('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>');
+out.push('<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">');
 out.push('<style>');
 out.push('*{box-sizing:border-box;} html,body{margin:0;padding:0;}');
-out.push('body{background:#1a1d1f; color:#e7e9ea; font-family:"Pretendard Variable","Pretendard",sans-serif; padding:40px 0 120px;}');
-out.push('.gallery-head{max-width:980px; margin:0 auto 56px; padding:0 24px;}');
-out.push('.gallery-head h1{font-size:28px; margin:0 0 8px;}');
+out.push('body{background:#1a1d1f; color:#e7e9ea; font-family:"Noto Sans KR",-apple-system,"Malgun Gothic",sans-serif; padding-block:40px 120px;}');
+out.push('.gallery-head{max-width:980px; margin:0 auto 56px; padding:0 20px;}');
+out.push('.gallery-head h1{font-size:clamp(20px,5vw,28px); margin:0 0 8px; text-wrap:balance;}');
 out.push('.gallery-head p{color:#9aa2a6; font-size:14px; line-height:1.6; max-width:640px;}');
-out.push('.concept-wrap{margin:0 auto 88px; max-width:calc(100vw - 48px);}');
-out.push('.concept-cap{max-width:980px; margin:0 auto 14px; padding:0 24px; display:flex; align-items:baseline; gap:10px;}');
+out.push('.gallery-head .note{color:#e7b866; font-size:13px; margin-top:10px;}');
+out.push('.concept-wrap{margin:0 auto 88px; max-width:980px; padding:0 20px; overflow-x:auto; -webkit-overflow-scrolling:touch;}');
+out.push('.concept-cap{max-width:940px; margin:0 auto 14px; padding:0 20px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}');
 out.push('.concept-cap .n{font-family:ui-monospace,Menlo,monospace; font-size:13px; color:#5fd0c9; flex:none;}');
 out.push('.concept-cap h2{font-size:17px; margin:0; color:#f2f4f5;}');
 out.push('.concept-cap .tag{font-size:13px; color:#9aa2a6;}');
-out.push('.frame{margin:0 auto; box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:8px; overflow:hidden; border:none; display:block;}');
+out.push('.frame{box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:8px; overflow:hidden; border:none; display:block; flex:none;}');
 out.push('</style></head><body>');
 out.push('<div class="gallery-head"><h1>onda — 홈 화면 레이아웃 탐색 (' + concepts.length + '개 안)</h1>');
-out.push('<p>색상/테마는 지금 쓰는 웨이브 톤 하나로 고정하고, 배치·타이포·카드 구조·네비게이션 방식만 다르게 구성했어요. 각 안은 완전히 독립된 문서(iframe)라 스타일이 서로 안 섞여요.</p></div>');
+out.push('<p>색상/테마는 지금 쓰는 웨이브 톤 하나로 고정하고, 배치·타이포·카드 구조·네비게이션 방식만 다르게 구성했어요. 각 안은 완전히 독립된 문서(iframe)라 스타일이 서로 안 섞여요.</p>' +
+  '<p class="note">⚠️ 이 안들은 데스크톱 화면 기준으로만 만들었어요. 모바일 반응형은 아직 없어서, 폰에서 보면 각 미리보기 박스를 옆으로 스크롤해서 원본 크기로 봐야 해요 — 실제 앱은 모바일도 따로 대응돼 있어요.</p></div>');
 
 function escAttr(s) {
   return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -753,12 +757,14 @@ function escAttr(s) {
 
 concepts.forEach(function (c) {
   var doc = '<!doctype html><html><head><meta charset="utf-8">' +
-    '<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">' +
-    '<style>*{box-sizing:border-box;}html,body{margin:0;padding:0;}body{font-family:"Pretendard Variable","Pretendard",sans-serif;}svg{display:block;}' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">' +
+    '<style>*{box-sizing:border-box;}html,body{margin:0;padding:0;}body{font-family:"Noto Sans KR",-apple-system,"Malgun Gothic",sans-serif;}svg{display:block;}' +
     c.css + '</style></head><body>' + c.html + '</body></html>';
   out.push('<div class="concept-cap" id="' + c.id + '"><span class="n">' + c.id + '</span><h2>' + c.title + '</h2><span class="tag">' + c.tagline + '</span></div>');
   out.push('<div class="concept-wrap">');
-  out.push('<iframe class="frame" style="width:' + c.width + 'px; max-width:100%; height:' + c.height + 'px;" srcdoc="' + escAttr(doc) + '"></iframe>');
+  out.push('<iframe class="frame" style="width:' + c.width + 'px; height:' + c.height + 'px;" srcdoc="' + escAttr(doc) + '"></iframe>');
   out.push('</div>');
 });
 
