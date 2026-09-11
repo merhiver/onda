@@ -20,6 +20,12 @@ var ME = null, PARTNER = null;
    compared live via URL, without touching the shipped default layout. */
 var PREVIEW_MODE = new URLSearchParams(location.search).get('preview') || null;
 
+/* ---------- layout variant (?layout=c01|c02|c06|c07|c11|c15|c19|c20|c23) ---------- */
+/* Same app, same data, same functions — only nav/hero/card chrome is
+   restyled per variant (desktop widths only; mobile is unaffected). */
+var LAYOUT_MODE = new URLSearchParams(location.search).get('layout') || null;
+if(LAYOUT_MODE) document.documentElement.setAttribute('data-layout', LAYOUT_MODE);
+
 /* ---------- app theme (per-browser, picked from Settings > 테마) ---------- */
 function getAppTheme(){
   try{ return localStorage.getItem('onda_theme') || 'wave'; }catch(e){ return 'wave'; }
@@ -238,7 +244,34 @@ function renderAll(){
   renderQuestion();
   renderChat();
   renderSideWidget();
+  renderHeroBlock();
   updateBadge();
+}
+
+/* ---------- persistent hero block (layout=c20 / c23: shown on every tab) ---------- */
+function renderHeroBlock(){
+  var el = document.getElementById('heroBlock');
+  if(!el) return;
+  if(LAYOUT_MODE !== 'c20' && LAYOUT_MODE !== 'c23'){ el.hidden = true; return; }
+  el.hidden = false;
+  var p = state.profile;
+  var ddayHtml;
+  if(p && p.anniversary){
+    var days = Math.floor((startOfDay(new Date()) - startOfDay(parseDate(p.anniversary))) / 86400000) + 1;
+    ddayHtml = '<div class="dday tabular">D+' + days + '</div><div class="annidate">' + esc(p.anniversary) + ' 부터</div>';
+  } else {
+    ddayHtml = '<div class="dday" style="font-size:16px;">사귄 날짜를 설정해보세요</div>';
+  }
+  var names = p ? (esc(p.nameA||'1번') + '  ·  ' + esc(p.nameB||'2번')) : '설정 전';
+  el.innerHTML =
+    '<div class="nav-brand" style="display:flex;">🌊 onda</div>' +
+    '<div class="hero ocean-card" style="margin-bottom:14px;"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
+    '<nav class="hero-block-nav">' +
+      ['home','calendar','record','bucket','question'].map(function(t){
+        var labels = {home:'홈', calendar:'캘린더', record:'기록', bucket:'버킷', question:'질문'};
+        return '<button class="navbtn' + (tab===t?' active':'') + '" onclick="switchTab(\''+t+'\')">' + esc(labels[t]) + '</button>';
+      }).join('') +
+    '</nav>';
 }
 
 /* ---------- layout preview widgets (see PREVIEW_MODE above) ---------- */
@@ -330,10 +363,16 @@ function renderHome(){
     '</div>';
   }
 
-  el.innerHTML =
-    '<div class="hero ocean-card"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
-    WAVE_SVG +
-    listsHtml;
+  var heroHtml = '<div class="hero ocean-card"><div class="names">' + names + '</div>' + ddayHtml + '</div>';
+  if(LAYOUT_MODE === 'c01'){
+    heroHtml = '<div class="stat-tiles">' +
+      '<div class="hero ocean-card stat-tile-hero"><div class="names">' + names + '</div>' + ddayHtml + '</div>' +
+      '<div class="card stat-tile"><div class="widget-title">연속 기록</div><div class="stat-num tabular">' + computeStreak() + '일</div></div>' +
+      '<div class="card stat-tile"><div class="widget-title">버킷 완료</div><div class="stat-num tabular">' + bucketCompletion() + '</div></div>' +
+    '</div>';
+  }
+
+  el.innerHTML = heroHtml + WAVE_SVG + listsHtml;
 }
 
 /* ---------- CALENDAR ---------- */
@@ -445,6 +484,14 @@ window.addEntry = function(){
   if(!text || !dbApi) return;
   dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, createdAt: Date.now()});
   ta.value = '';
+};
+window.quickAddSubmit = function(){
+  var input = document.getElementById('quickAddInput');
+  var text = input.value.trim();
+  if(!text || !dbApi) return;
+  dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, createdAt: Date.now()});
+  input.value = '';
+  switchTab('record');
 };
 window.deleteEntry = function(id){
   if(!dbApi) return;

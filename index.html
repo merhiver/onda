@@ -19,6 +19,13 @@
     </button>
   </div>
 
+  <div id="quickAdd" class="quickadd-bar" hidden>
+    <span class="quickadd-icon">➕</span>
+    <input id="quickAddInput" class="quickadd-input" placeholder="무엇을 기록할까요? 입력 후 Enter" onkeydown="if(event.key==='Enter')quickAddSubmit()">
+  </div>
+
+  <aside id="heroBlock" class="hero-block" hidden></aside>
+
   <main>
     <section class="panel" id="panel-home"></section>
     <section class="panel" id="panel-calendar"></section>
