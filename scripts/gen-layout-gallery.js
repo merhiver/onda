@@ -16,7 +16,7 @@ var EVENTS = [
   { t: "한강 피크닉", who: "바니", d: "9월 27일(일)" }
 ];
 var RECORDS = [
-  { who: "바니", d: "9월 10일", t: "오늘 스벅에서 케이크 먹음 완전 맛있었음" },
+  { who: "바니", d: "9월 10일", t: "오늘 투썸에서 케이크 먹음 완전 맛있었음" },
   { who: "키쿠", d: "9월 9일", t: "야근 끝... 근데 보고싶다 얼른 자자" },
   { who: "바니", d: "9월 8일", t: "주말에 등산 가기로 함 기대된다" }
 ];
@@ -729,7 +729,7 @@ add("소프트 뉴모피즘", "엠보스/디보스 음영의 촉감 있는 표�
 var out = [];
 out.push('<!doctype html><html lang="ko"><head><meta charset="utf-8">');
 out.push('<meta name="viewport" content="width=device-width, initial-scale=1">');
-out.push('<title>onda layout exploration</title>');
+out.push('<title>온다 레이아웃 갤러리</title>');
 out.push('<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">');
 out.push('<style>');
 out.push('*{box-sizing:border-box;} html,body{margin:0;padding:0;}');
