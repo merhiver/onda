@@ -20,7 +20,7 @@ var ME = null, PARTNER = null;
    compared live via URL, without touching the shipped default layout. */
 var PREVIEW_MODE = new URLSearchParams(location.search).get('preview') || null;
 
-/* ---------- layout variant (?layout=c01|c02|c06|c07|c11|c15|c19|c20|c23) ---------- */
+/* ---------- layout variant (?layout=c01|c02|c06|c07|c15|c19|c23) ---------- */
 /* Same app, same data, same functions — only nav/hero/card chrome is
    restyled per variant (desktop widths only; mobile is unaffected). */
 var LAYOUT_MODE = new URLSearchParams(location.search).get('layout') || null;
@@ -264,11 +264,11 @@ function renderAll(){
   updateBadge();
 }
 
-/* ---------- persistent hero block (layout=c20 / c23: shown on every tab) ---------- */
+/* ---------- persistent hero block (layout=c23: shown on every tab) ---------- */
 function renderHeroBlock(){
   var el = document.getElementById('heroBlock');
   if(!el) return;
-  if(LAYOUT_MODE !== 'c20' && LAYOUT_MODE !== 'c23'){ el.hidden = true; return; }
+  if(LAYOUT_MODE !== 'c23'){ el.hidden = true; return; }
   el.hidden = false;
   var p = state.profile;
   var ddayHtml;
@@ -371,7 +371,7 @@ function renderHome(){
     '<div class="card">' + upcomingHtml + '</div>' +
     '<div class="section-title">최근 기록</div>' +
     recentHtml;
-  if(PREVIEW_MODE === 'grid' || LAYOUT_MODE === 'c01' || LAYOUT_MODE === 'c11' || LAYOUT_MODE === 'c23'){
+  if(PREVIEW_MODE === 'grid' || LAYOUT_MODE === 'c01' || LAYOUT_MODE === 'c23'){
     listsHtml = '<div class="home-2col">' +
       '<div><div class="section-title">다가오는 일정</div><div class="card">' + upcomingHtml + '</div></div>' +
       '<div><div class="section-title">최근 기록</div>' + recentHtml + '</div>' +

@@ -303,10 +303,10 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 #navWrap{display:contents;}
 
 @media (min-width:880px){
-  /* shared: the 9 chosen concepts use flat hero color, never the default gradient */
+  /* shared: the 7 chosen concepts use flat hero color, never the default gradient */
   :root[data-layout="c01"] .ocean-card, :root[data-layout="c02"] .ocean-card, :root[data-layout="c06"] .ocean-card,
-  :root[data-layout="c07"] .ocean-card, :root[data-layout="c11"] .ocean-card, :root[data-layout="c15"] .ocean-card,
-  :root[data-layout="c19"] .ocean-card, :root[data-layout="c20"] .ocean-card, :root[data-layout="c23"] .ocean-card{
+  :root[data-layout="c07"] .ocean-card, :root[data-layout="c15"] .ocean-card,
+  :root[data-layout="c19"] .ocean-card, :root[data-layout="c23"] .ocean-card{
     background:var(--primary-active);
   }
 
@@ -382,27 +382,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c07"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
   :root[data-layout="c07"] .card.stack{gap:10px;}
 
-  /* c11 — full-bleed hero: nav is a horizontal row merged into the dark band, not a right sidebar */
-  :root[data-layout="c11"] #topbar{order:-2; background:var(--primary-active); color:#fff; padding-bottom:0; margin-bottom:0;}
-  :root[data-layout="c11"] #topbarWord{color:#fff;}
-  :root[data-layout="c11"] #gear{color:rgba(255,255,255,.75);}
-  :root[data-layout="c11"] .nav-brand{display:none;}
-  :root[data-layout="c11"] #nav{
-    position:static; width:auto; flex:0 0 100%; order:-1;
-    flex-direction:row; justify-content:flex-end; gap:20px;
-    background:var(--primary-active); box-shadow:none; border-radius:0; padding:0 8px 20px 40px;
-  }
-  :root[data-layout="c11"] .navbtn{flex-direction:row; padding:0; font-size:13px; font-weight:700; color:rgba(255,255,255,.75);}
-  :root[data-layout="c11"] .navbtn svg{display:none;}
-  :root[data-layout="c11"] .navbtn:hover{background:none;}
-  :root[data-layout="c11"] .navbtn.active{background:none; color:#fff;}
-  :root[data-layout="c11"] .navbtn .dot{position:static; margin-left:4px;}
-  :root[data-layout="c11"] main{padding-top:0;}
-  :root[data-layout="c11"] #panel-home .hero{margin:0 -8px 0 -40px; border-radius:0; padding:40px 40px 46px;}
-  :root[data-layout="c11"] #panel-home .wave-deco{display:none;}
-  :root[data-layout="c11"] #panel-home .card{box-shadow:var(--shadow-2);}
-  :root[data-layout="c11"] #panel-home .home-2col{margin-top:-22px; position:relative;}
-
   /* c15 — persistent quick-add bar + pill nav, dday shrinks to a flat label/value row */
   :root[data-layout="c15"] #topbar{order:-4;}
   :root[data-layout="c15"] #quickAdd{display:flex; flex:0 0 100%; order:-3; margin:0 8px 8px 40px;}
@@ -433,22 +412,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c19"] #panel-home .hero .dday{color:var(--primary);}
   :root[data-layout="c19"] #panel-home .hero .annidate{color:var(--ink-faint);}
 
-  /* c20 — 50/50 split: full-height solid dark left panel (nav on top, dday pinned to bottom) */
-  :root[data-layout="c20"] #shell{align-items:stretch;}
-  :root[data-layout="c20"] #nav{display:none;}
-  :root[data-layout="c20"] #heroBlock{
-    display:flex; flex-direction:column; justify-content:space-between; align-self:stretch;
-    width:34%; flex:none; background:var(--primary-active); color:#fff;
-    border-radius:var(--radius-xl); box-shadow:none; padding:24px 20px; position:sticky; top:32px;
-  }
-  :root[data-layout="c20"] #heroBlock .hero{background:transparent; box-shadow:none; padding:0; text-align:left;}
-  :root[data-layout="c20"] .hero-block-nav{gap:4px;}
-  :root[data-layout="c20"] #heroBlock .navbtn{padding:14px 14px; font-size:15px; color:rgba(255,255,255,.65); font-weight:700; border-radius:9px;}
-  :root[data-layout="c20"] #heroBlock .navbtn:hover{background:rgba(255,255,255,.1);}
-  :root[data-layout="c20"] #heroBlock .navbtn.active{background:rgba(255,255,255,.16); color:#fff;}
-  :root[data-layout="c20"] main{flex:1; max-width:none; margin:0; padding:0 8px 60px 24px;}
-  :root[data-layout="c20"] #topbar{padding:0 8px 20px calc(34% + 24px);}
-
   /* c23 — narrow hero-as-sidebar, same treatment at a fixed width */
   :root[data-layout="c23"] #shell{align-items:stretch;}
   :root[data-layout="c23"] #nav{display:none;}
@@ -466,7 +429,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c23"] #topbar{padding:0 8px 20px calc(240px + 24px);}
 
   /* heroBlock already shows the dday card persistently — don't repeat it in the home panel */
-  :root[data-layout="c20"] #panel-home .hero,
   :root[data-layout="c23"] #panel-home .hero{display:none;}
 }
 
