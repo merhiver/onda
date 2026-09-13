@@ -307,10 +307,17 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 #navWrap{display:contents;}
 
 /* ---- per-concept color/shape signature: applies at every width ---- */
-:root[data-layout="c01"] .ocean-card, :root[data-layout="c02"] .ocean-card, :root[data-layout="c06"] .ocean-card,
-:root[data-layout="c07"] .ocean-card, :root[data-layout="c15"] .ocean-card,
-:root[data-layout="c19"] .ocean-card, :root[data-layout="c23"] .ocean-card{
-  background:var(--primary-active);
+/* No-gradient rule only needs solving for the default "wave" look — every
+   named theme already ships its own flat, contrast-checked .hero/.q-card
+   color (some dark+white text, "supabase" is light+dark text), so we must
+   NOT override those with a single guessed color: var(--primary-active)
+   isn't guaranteed dark, and forcing it broke legibility on any theme
+   where it resolves light (caught via a real screenshot, not assumed). */
+:root[data-layout="c01"][data-app-theme="wave"] .ocean-card, :root[data-layout="c02"][data-app-theme="wave"] .ocean-card,
+:root[data-layout="c06"][data-app-theme="wave"] .ocean-card, :root[data-layout="c07"][data-app-theme="wave"] .ocean-card,
+:root[data-layout="c15"][data-app-theme="wave"] .ocean-card, :root[data-layout="c19"][data-app-theme="wave"] .ocean-card,
+:root[data-layout="c23"][data-app-theme="wave"] .ocean-card{
+  background:#0a5a68;
 }
 
 /* c01 — dday tile shrinks to a label + number, like the desktop stat-tile */
@@ -444,7 +451,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c23"] #nav{display:none;}
   :root[data-layout="c23"] #heroBlock{
     display:flex; flex-direction:column; justify-content:space-between; align-self:stretch;
-    width:240px; flex:none; background:var(--primary-active); color:#fff;
+    width:240px; flex:none; background:#0a5a68; color:#fff;
     border-radius:var(--radius-xl); box-shadow:none; padding:24px 18px; position:sticky; top:32px;
   }
   :root[data-layout="c23"] #heroBlock .hero{background:transparent; box-shadow:none; padding:0; text-align:left;}
@@ -454,6 +461,25 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c23"] #heroBlock .navbtn.active{background:rgba(255,255,255,.16); color:#fff;}
   :root[data-layout="c23"] main{flex:1; max-width:640px; margin:0; padding:0 8px 60px 24px;}
   :root[data-layout="c23"] #topbar{padding:0 8px 20px calc(240px + 24px);}
+
+  /* #heroBlock isn't a .hero/.ocean-card, so it has no theme-aware color of its
+     own — it must borrow each theme's actual hero hex (same values as the
+     [data-app-theme="X"] .hero rules below) instead of a guessed variable.
+     New theme added later? add its color here too, or this panel goes dark-on-dark/light-on-light. */
+  :root[data-layout="c23"][data-app-theme="summer"] #heroBlock{background:#023e8a;}
+  :root[data-layout="c23"][data-app-theme="winter"] #heroBlock{background:#132639;}
+  :root[data-layout="c23"][data-app-theme="storm"] #heroBlock{background:#1f2430;}
+  :root[data-layout="c23"][data-app-theme="coral-reef"] #heroBlock{background:#0b4d43;}
+  :root[data-layout="c23"][data-app-theme="sea-salt"] #heroBlock{background:#23282b;}
+  :root[data-layout="c23"][data-app-theme="high-tide"] #heroBlock{background:#0d4a40;}
+  :root[data-layout="c23"][data-app-theme="yunseul"] #heroBlock{background:#0d2b42;}
+  :root[data-layout="c23"][data-app-theme="midnight"] #heroBlock{background:#050510;}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock{background:var(--surface); color:var(--ink); border:1px solid var(--hairline);}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .hero .names{color:var(--ink-muted);}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .hero .annidate{color:var(--ink-faint);}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn{color:var(--ink-muted);}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn:hover{background:var(--surface-alt);}
+  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn.active{background:var(--surface-alt); color:var(--ink);}
 
   /* heroBlock already shows the dday card persistently — don't repeat it in the home panel */
   :root[data-layout="c23"] #panel-home .hero{display:none;}
