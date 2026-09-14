@@ -159,6 +159,10 @@ function translateAuthError(msg){
   if(/network|fetch|failed to fetch/i.test(msg)) return '네트워크 연결을 확인해주세요';
   return '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
 }
+var SETUP_INCOMPLETE_MSG = 'DB 설정이 아직 안 끝났어요. Supabase SQL Editor에서 migrate-to-auth.sql을 실행해주세요.';
+function isMissingMembersTable(err){
+  return !!err && (err.code === 'PGRST205' || /could not find the table/i.test(err.message || ''));
+}
 window.submitAuth = function(){
   var username = document.getElementById('authUser').value.trim();
   var pw = document.getElementById('authPw').value;
@@ -175,7 +179,10 @@ window.submitAuth = function(){
           throw new Error('이메일 확인이 켜져 있어요. Supabase의 Authentication > Providers > Email에서 "Confirm email"을 꺼주세요.');
         }
         return sb.from('members').insert({ uid: res.data.user.id, role: authRole }).then(function(ins){
-          if(ins.error) throw new Error('이미 등록된 자리예요. 로그인으로 시도해보세요.');
+          if(ins.error){
+            if(isMissingMembersTable(ins.error)) throw new Error(SETUP_INCOMPLETE_MSG);
+            throw new Error('이미 등록된 자리예요. 로그인으로 시도해보세요.');
+          }
         });
       })
     : sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res){
@@ -193,8 +200,18 @@ function afterAuth(){
     var uid = res.data && res.data.session && res.data.session.user && res.data.session.user.id;
     if(!uid){ authBusy = false; authError = '로그인에 실패했어요'; renderAuthScreen(); return; }
     return sb.from('members').select('role').eq('uid', uid).maybeSingle().then(function(m){
-      if(m.error || !m.data){
-        authBusy = false; authError = '계정 정보를 찾을 수 없어요'; renderAuthScreen(); return;
+      authBusy = false;
+      if(m.error){
+        authError = isMissingMembersTable(m.error) ? SETUP_INCOMPLETE_MSG : '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
+        renderAuthScreen(); return;
+      }
+      if(!m.data){
+        // signed in fine, but no role was ever claimed — happens when an
+        // earlier signup created the account and then failed (rate limit,
+        // email confirm) before reaching the members insert. Recover
+        // instead of dead-ending: let them claim a role right now.
+        renderClaimRoleScreen(uid);
+        return;
       }
       ME = m.data.role; PARTNER = ME === 'a' ? 'b' : 'a';
       document.getElementById('authScreen').hidden = true;
@@ -202,6 +219,35 @@ function afterAuth(){
     });
   });
 }
+function renderClaimRoleScreen(uid){
+  var el = document.getElementById('authScreen');
+  if(!el) return;
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="auth-card">' +
+      '<div class="auth-logo">🌊 onda</div>' +
+      '<h2>거의 다 됐어요</h2>' +
+      '<p class="sub">로그인은 됐는데 아직 역할을 안 고르셨네요. 둘 중 누구신가요?</p>' +
+      (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
+      '<div class="choose-btns">' +
+        '<button type="button" onclick="claimRole(\'' + uid + '\',\'a\')">' + ROLE_EMOJI.a + '</button>' +
+        '<button type="button" onclick="claimRole(\'' + uid + '\',\'b\')">' + ROLE_EMOJI.b + '</button>' +
+      '</div>' +
+    '</div>';
+}
+window.claimRole = function(uid, role){
+  authError = '';
+  sb.from('members').insert({ uid: uid, role: role }).then(function(ins){
+    if(ins.error){
+      authError = '이미 등록된 자리예요. 다른 쪽으로 시도해보세요.';
+      renderClaimRoleScreen(uid);
+      return;
+    }
+    ME = role; PARTNER = role === 'a' ? 'b' : 'a';
+    document.getElementById('authScreen').hidden = true;
+    boot();
+  });
+};
 window.logout = function(){
   closeOverlay();
   sb.auth.signOut();
