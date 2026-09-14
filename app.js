@@ -147,6 +147,18 @@ window.toggleAuthMode = function(){
   authRole = null; authError = '';
   renderAuthScreen();
 };
+/* Supabase's own auth error text is always English — translate every
+   known case, and fall back to a generic Korean message for anything
+   else so raw English never reaches the screen. */
+function translateAuthError(msg){
+  msg = msg || '';
+  if(/already registered/i.test(msg)) return '이미 있는 아이디예요. 로그인으로 시도해보세요.';
+  if(/invalid login credentials/i.test(msg)) return '아이디 또는 비밀번호가 올바르지 않아요';
+  if(/rate limit/i.test(msg)) return '요청이 너무 잦아요. 잠시 후 다시 시도해주세요.';
+  if(/password.*(least|short|weak|character)/i.test(msg)) return '비밀번호가 너무 짧아요. 6자 이상으로 만들어주세요.';
+  if(/network|fetch|failed to fetch/i.test(msg)) return '네트워크 연결을 확인해주세요';
+  return '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
+}
 window.submitAuth = function(){
   var username = document.getElementById('authUser').value.trim();
   var pw = document.getElementById('authPw').value;
@@ -158,10 +170,7 @@ window.submitAuth = function(){
 
   var flow = authMode === 'signup'
     ? sb.auth.signUp({ email: email, password: pw }).then(function(res){
-        if(res.error){
-          if(/already registered/i.test(res.error.message)) throw new Error('이미 있는 아이디예요. 로그인으로 시도해보세요.');
-          throw res.error;
-        }
+        if(res.error) throw new Error(translateAuthError(res.error.message));
         if(!res.data.session){
           throw new Error('이메일 확인이 켜져 있어요. Supabase의 Authentication > Providers > Email에서 "Confirm email"을 꺼주세요.');
         }
@@ -170,7 +179,7 @@ window.submitAuth = function(){
         });
       })
     : sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res){
-        if(res.error) throw new Error('아이디 또는 비밀번호가 올바르지 않아요');
+        if(res.error) throw new Error(translateAuthError(res.error.message));
       });
 
   flow.then(afterAuth).catch(function(e){
