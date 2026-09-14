@@ -98,7 +98,8 @@ var QUESTIONS = [
   "오늘 저녁 메뉴 뭐 먹을까?","최근에 나한테 제일 놀랐던 순간은?",
   "우리 관계에서 제일 소중한 게 뭐라고 생각해?","작은 행복이라고 느꼈던 최근 순간은?"
 ];
-function todayQuestion(){ return QUESTIONS[dayOfYear(new Date()) % QUESTIONS.length]; }
+function todayQuestion(){ return questionForDate(todayStr()); }
+function questionForDate(dateStr){ return QUESTIONS[dayOfYear(parseDate(dateStr)) % QUESTIONS.length]; }
 
 var WAVE_SVG = '<svg class="wave-deco" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true">' +
   '<path d="M0 14 C 50 24 100 4 150 14 C 200 24 250 4 300 14 C 350 24 400 14 400 14 V24 H0 Z" fill="currentColor"/></svg>';
@@ -669,34 +670,86 @@ window.deleteBucket = function(id){
   dbApi.collection('bucket').doc(id).delete();
 };
 
-/* ---------- QUESTION OF THE DAY (tab content) ---------- */
+/* ---------- QUESTION OF THE DAY (tab content, + past days' Q&A) ---------- */
+var editingAnswerDate = null; // date currently showing my own answer as an editable textarea
+
+function myAnswerBoxHtml(dateStr, myAns){
+  if(editingAnswerDate === dateStr){
+    return '<div class="composer"><textarea class="input" id="ans-input-' + dateStr + '" rows="2">' + (myAns ? esc(myAns.text) : '') + '</textarea>' +
+      '<button class="btn" onclick="saveAnswer(\'' + dateStr + '\')">저장</button>' +
+      '<button class="btn secondary" onclick="cancelEditAnswer()">취소</button></div>';
+  }
+  if(myAns){
+    return '<div class="ans-box"><div class="who">' + esc(myName()) + '</div><div class="ans-txt">' + esc(myAns.text) + '</div>' +
+      '<div class="row" style="gap:8px; margin-top:8px;">' +
+        '<button class="btn secondary" onclick="startEditAnswer(\'' + dateStr + '\')">수정</button>' +
+        '<button class="btn secondary" onclick="deleteAnswer(\'' + dateStr + '\')">삭제</button>' +
+      '</div></div>';
+  }
+  return '<div class="composer"><textarea class="input" id="ans-input-' + dateStr + '" rows="2" placeholder="' + (dateStr === todayStr() ? '오늘 질문에 답해보세요' : '이 질문에 답해보세요') + '"></textarea>' +
+    '<button class="btn" onclick="saveAnswer(\'' + dateStr + '\')">답변</button></div>';
+}
+function partnerAnswerBoxHtml(partnerAns){
+  return partnerAns
+    ? '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt">' + esc(partnerAns.text) + '</div></div>'
+    : '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt faint">아직 답변 전이에요</div></div>';
+}
+
 function renderQuestion(){
   var el = document.getElementById('panel-question');
   if(!el) return;
-  var q = todayQuestion();
-  var myAns = state.answers.find(function(a){ return a.author === ME && a.date === todayStr(); });
-  var partnerAns = state.answers.find(function(a){ return a.author === PARTNER && a.date === todayStr(); });
+  var today = todayStr();
+  var myAns = state.answers.find(function(a){ return a.author === ME && a.date === today; });
+  var partnerAns = state.answers.find(function(a){ return a.author === PARTNER && a.date === today; });
 
-  var myAnsHtml = myAns
-    ? '<div class="ans-box"><div class="who">' + esc(myName()) + '</div><div class="ans-txt">' + esc(myAns.text) + '</div></div>'
-    : '<div class="composer"><textarea class="input" id="newAnswer" rows="2" placeholder="오늘 질문에 답해보세요"></textarea><button class="btn" onclick="saveAnswer()">답변</button></div>';
-  var partnerAnsHtml = partnerAns
-    ? '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt">' + esc(partnerAns.text) + '</div></div>'
-    : '<div class="ans-box"><div class="who">' + esc(partnerName()) + '</div><div class="ans-txt faint">아직 답변 전이에요</div></div>';
-
-  el.innerHTML =
+  var todayHtml =
     '<div class="q-card ocean-card">' +
       '<div class="q-label">오늘의 질문</div>' +
-      '<div class="q-text">' + esc(q) + '</div>' +
-      '<div class="ans-grid">' + myAnsHtml + partnerAnsHtml + '</div>' +
+      '<div class="q-text">' + esc(todayQuestion()) + '</div>' +
+      '<div class="ans-grid">' + myAnswerBoxHtml(today, myAns) + partnerAnswerBoxHtml(partnerAns) + '</div>' +
     '</div>' +
     WAVE_SVG;
+
+  var pastDates = [];
+  state.answers.forEach(function(a){
+    if(a.date !== today && pastDates.indexOf(a.date) === -1) pastDates.push(a.date);
+  });
+  pastDates.sort(function(a,b){ return a < b ? 1 : -1; });
+
+  var historyHtml = '';
+  if(pastDates.length){
+    historyHtml = '<div class="section-title">지난 질문</div>' + pastDates.map(function(d){
+      var mine = state.answers.find(function(a){ return a.author === ME && a.date === d; });
+      var theirs = state.answers.find(function(a){ return a.author === PARTNER && a.date === d; });
+      return '<div class="q-card ocean-card" style="margin-bottom:14px;">' +
+        '<div class="q-label">' + esc(fmtDate(d)) + '</div>' +
+        '<div class="q-text" style="font-size:16px;">' + esc(questionForDate(d)) + '</div>' +
+        '<div class="ans-grid">' + myAnswerBoxHtml(d, mine) + partnerAnswerBoxHtml(theirs) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  el.innerHTML = todayHtml + historyHtml;
 }
-window.saveAnswer = function(){
-  var ta = document.getElementById('newAnswer');
+window.startEditAnswer = function(dateStr){
+  editingAnswerDate = dateStr;
+  renderQuestion();
+};
+window.cancelEditAnswer = function(){
+  editingAnswerDate = null;
+  renderQuestion();
+};
+window.saveAnswer = function(dateStr){
+  dateStr = dateStr || todayStr();
+  var ta = document.getElementById('ans-input-' + dateStr);
   var text = ta.value.trim();
   if(!text || !dbApi) return;
-  dbApi.doc('answers/' + todayStr() + '_' + ME).set({date: todayStr(), author: ME, text: text, createdAt: Date.now()});
+  dbApi.doc('answers/' + dateStr + '_' + ME).set({date: dateStr, author: ME, text: text, createdAt: Date.now()});
+  editingAnswerDate = null;
+};
+window.deleteAnswer = function(dateStr){
+  if(!dbApi) return;
+  dbApi.doc('answers/' + dateStr + '_' + ME).delete();
 };
 
 /* ---------- MESSAGES (floating chat widget, global) ---------- */
@@ -755,7 +808,7 @@ function subscribe(){
     state.messages = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     renderAll();
   });
-  dbApi.collection('answers').where('date','==', todayStr()).limit(2).onSnapshot(function(qs){
+  dbApi.collection('answers').orderBy('date','desc').limit(200).onSnapshot(function(qs){
     state.answers = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     renderAll();
   });
