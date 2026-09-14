@@ -226,6 +226,17 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 .field label{display:block; font-size:12px; font-weight:500; color:var(--ink-muted); margin-bottom:5px;}
 .choose-btns{display:flex; gap:10px; margin-top:6px;}
 .choose-btns button{flex:1; padding:16px 8px; border-radius:var(--radius-card); border:1.5px solid var(--hairline); background:var(--surface-alt); font-weight:600; cursor:pointer; color:var(--ink);}
+.choose-btns button.active{background:var(--primary); color:var(--on-primary); border-color:var(--primary);}
+
+/* full-screen login/signup — covers everything until a session resolves */
+#authScreen{position:fixed; inset:0; z-index:100; background:var(--canvas); display:flex; align-items:center; justify-content:center; padding:24px;}
+#authScreen[hidden]{display:none;}
+.auth-card{width:100%; max-width:380px;}
+.auth-logo{font-size:15px; font-weight:600; margin-bottom:18px; text-align:center;}
+.auth-card h2{font-family:var(--font-display); font-size:22px; margin-bottom:6px; text-align:center;}
+.auth-card .sub{color:var(--ink-muted); font-size:13.5px; margin-bottom:18px; text-align:center;}
+.auth-err{background:var(--pink-bg); color:var(--coral-active); font-size:13px; padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:14px;}
+.auth-switch{display:block; width:100%; text-align:center; background:none; border:none; color:var(--ink-muted); font-size:13px; margin-top:14px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
 
 #dateMap{width:100%; height:220px; border-radius:var(--radius-md); overflow:hidden; background:var(--surface-alt); margin-top:4px;}
 #dateMap .empty{padding:0; height:220px; display:flex; align-items:center; justify-content:center;}

@@ -1,19 +1,11 @@
 "use strict";
 
 /* ---------- identity ---------- */
+/* Real Supabase Auth now — no more self-declared ?u=a/?u=b. ME/PARTNER
+   are only ever set after a signed-in session resolves to a row in the
+   "members" table (see afterAuth() near the bottom). */
 var ME = null, PARTNER = null;
-(function resolveIdentity(){
-  var params = new URLSearchParams(location.search);
-  var u = params.get('u');
-  if(u === 'a' || u === 'b'){
-    try{ localStorage.setItem('onda_me', u); }catch(e){}
-    ME = u;
-  } else {
-    try{ ME = localStorage.getItem('onda_me'); }catch(e){ ME = null; }
-  }
-  if(ME !== 'a' && ME !== 'b') ME = null;
-  PARTNER = ME === 'a' ? 'b' : (ME === 'b' ? 'a' : null);
-})();
+var sb = null; // raw supabase client — needed for auth.* calls before dbApi exists
 
 /* ---------- layout preview (temporary, ?preview=sidebar|stats|grid|photo) ---------- */
 /* Lets the wide-screen "what should fill the empty space" options be
@@ -105,22 +97,91 @@ var WAVE_SVG = '<svg class="wave-deco" viewBox="0 0 400 24" preserveAspectRatio=
   '<path d="M0 14 C 50 24 100 4 150 14 C 200 24 250 4 300 14 C 350 24 400 14 400 14 V24 H0 Z" fill="currentColor"/></svg>';
 
 /* ---------- identity chooser (fallback) ---------- */
-function renderChooser(){
-  document.getElementById('overlayRoot').innerHTML =
-    '<div class="overlay"><div class="sheet">' +
-      '<h2>처음 오셨네요</h2>' +
-      '<p class="sub">둘 중 누구신가요? 한 번 고르면 이 브라우저에서는 계속 기억해요. 다음부턴 서로 받은 개인 링크로 바로 들어오면 더 편해요.</p>' +
-      '<div class="choose-btns">' +
-        '<button onclick="chooseIdentity(\'a\')">1번 (나)</button>' +
-        '<button onclick="chooseIdentity(\'b\')">2번 (나)</button>' +
-      '</div>' +
-    '</div></div>';
+/* ---------- login / signup screen (full-screen, shown until authenticated) ---------- */
+var authMode = 'signin'; // 'signin' | 'signup'
+var authRole = null;     // 'a' | 'b', chosen during signup
+var authError = '';
+var authBusy = false;
+
+function renderAuthScreen(){
+  var el = document.getElementById('authScreen');
+  if(!el) return;
+  // preserve whatever's already typed — pickAuthRole()/a failed validation
+  // both re-render this screen, and silently wiping the fields the user
+  // just typed into would be a real papercut, not just a test artifact
+  var prevEmail = (document.getElementById('authEmail') || {}).value || '';
+  var prevPw = (document.getElementById('authPw') || {}).value || '';
+  el.hidden = false;
+  var isSignup = authMode === 'signup';
+  el.innerHTML =
+    '<div class="auth-card">' +
+      '<div class="auth-logo">🌊 onda</div>' +
+      '<h2>' + (isSignup ? '처음 오셨네요' : '로그인') + '</h2>' +
+      '<p class="sub">' + (isSignup ? '이메일과 비밀번호로 계정을 만들고, 둘 중 누구신지 골라주세요.' : '가입할 때 쓴 이메일과 비밀번호로 로그인하세요.') + '</p>' +
+      (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
+      '<div class="field"><label>이메일</label><input class="input" id="authEmail" type="email" autocomplete="email"></div>' +
+      '<div class="field"><label>비밀번호</label><input class="input" id="authPw" type="password" autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '"></div>' +
+      (isSignup ?
+        '<div class="field"><label>둘 중 누구신가요?</label><div class="choose-btns">' +
+          '<button type="button" class="' + (authRole==='a'?'active':'') + '" onclick="pickAuthRole(\'a\')">1번</button>' +
+          '<button type="button" class="' + (authRole==='b'?'active':'') + '" onclick="pickAuthRole(\'b\')">2번</button>' +
+        '</div></div>' : '') +
+      '<button class="btn block" onclick="submitAuth()"' + (authBusy?' disabled':'') + '>' + (authBusy ? '처리 중…' : (isSignup ? '가입하기' : '로그인')) + '</button>' +
+      '<button class="auth-switch" onclick="toggleAuthMode()">' + (isSignup ? '이미 계정이 있어요 — 로그인' : '처음이에요 — 가입할게요') + '</button>' +
+    '</div>';
+  document.getElementById('authEmail').value = prevEmail;
+  document.getElementById('authPw').value = prevPw;
 }
-window.chooseIdentity = function(who){
-  ME = who; PARTNER = who === 'a' ? 'b' : 'a';
-  try{ localStorage.setItem('onda_me', who); }catch(e){}
-  document.getElementById('overlayRoot').innerHTML = '';
-  boot();
+window.pickAuthRole = function(r){ authRole = r; renderAuthScreen(); };
+window.toggleAuthMode = function(){
+  authMode = authMode === 'signin' ? 'signup' : 'signin';
+  authRole = null; authError = '';
+  renderAuthScreen();
+};
+window.submitAuth = function(){
+  var email = document.getElementById('authEmail').value.trim();
+  var pw = document.getElementById('authPw').value;
+  if(!email || !pw){ authError = '이메일과 비밀번호를 입력해주세요'; renderAuthScreen(); return; }
+  if(authMode === 'signup' && !authRole){ authError = '둘 중 누구신지 골라주세요'; renderAuthScreen(); return; }
+  authBusy = true; authError = ''; renderAuthScreen();
+
+  var flow = authMode === 'signup'
+    ? sb.auth.signUp({ email: email, password: pw }).then(function(res){
+        if(res.error) throw res.error;
+        if(!res.data.session){
+          throw new Error('이메일 확인이 켜져 있어요. Supabase의 Authentication > Providers > Email에서 "Confirm email"을 꺼주세요.');
+        }
+        return sb.from('members').insert({ uid: res.data.user.id, role: authRole }).then(function(ins){
+          if(ins.error) throw new Error('이미 등록된 자리예요. 로그인으로 시도해보세요.');
+        });
+      })
+    : sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res){
+        if(res.error) throw res.error;
+      });
+
+  flow.then(afterAuth).catch(function(e){
+    authBusy = false;
+    authError = (e && e.message) || '문제가 발생했어요';
+    renderAuthScreen();
+  });
+};
+function afterAuth(){
+  return sb.auth.getSession().then(function(res){
+    var uid = res.data && res.data.session && res.data.session.user && res.data.session.user.id;
+    if(!uid){ authBusy = false; authError = '로그인에 실패했어요'; renderAuthScreen(); return; }
+    return sb.from('members').select('role').eq('uid', uid).maybeSingle().then(function(m){
+      if(m.error || !m.data){
+        authBusy = false; authError = '계정 정보를 찾을 수 없어요'; renderAuthScreen(); return;
+      }
+      ME = m.data.role; PARTNER = ME === 'a' ? 'b' : 'a';
+      document.getElementById('authScreen').hidden = true;
+      boot();
+    });
+  });
+}
+window.logout = function(){
+  closeOverlay();
+  sb.auth.signOut();
 };
 
 /* ---------- settings / onboarding ---------- */
@@ -149,7 +210,8 @@ function renderInfoTab(){
     '<div class="row" style="margin-top:14px;">' +
       '<button class="btn secondary block" onclick="closeOverlay()">닫기</button>' +
       '<button class="btn block" onclick="saveProfile()">저장</button>' +
-    '</div>';
+    '</div>' +
+    '<button class="auth-switch" style="margin-top:18px;" onclick="logout()">로그아웃</button>';
 }
 var THEMES = [
   { id:'wave', name:'웨이브', desc:'청록 + 코랄 바다 톤, 둥근 곡선', swatch:['#0ea5b7','#ff7a59','#eef7f7'] },
@@ -790,8 +852,7 @@ function openOnboardingIfNeeded(){
   openSettings();
 }
 
-async function boot(){
-  if(!ME){ renderChooser(); return; }
+function boot(){
   document.getElementById('overlayRoot').innerHTML = '';
   if(PREVIEW_MODE === 'grid'){
     var mainEl = document.querySelector('main');
@@ -799,19 +860,31 @@ async function boot(){
   }
   switchTab('home');
   initKakao();
-  try{
-    var cfg = window.ONDA_CONFIG || {};
-    if(!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1){
-      dbApi = null;
-    } else {
-      var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      dbApi = window.createDocStore(client);
-    }
-  }catch(e){ dbApi = null; }
-  if(!dbApi){
-    document.getElementById('panel-home').innerHTML = '<div class="empty">config.js에 Supabase 프로젝트 URL/anon key를 아직 입력하지 않았어요.</div>';
-    return;
-  }
+  dbApi = window.createDocStore(sb);
   subscribe();
 }
-boot();
+
+/* ---------- init: resolve or show the login screen ---------- */
+(function initAuth(){
+  var cfg = window.ONDA_CONFIG || {};
+  if(!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1){
+    document.getElementById('authScreen').innerHTML = '<div class="auth-card">config.js에 Supabase 프로젝트 URL/anon key를 아직 입력하지 않았어요.</div>';
+    return;
+  }
+  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange(function(event){
+    if(event === 'SIGNED_OUT'){
+      ME = null; PARTNER = null; dbApi = null;
+      authMode = 'signin'; authRole = null; authError = ''; authBusy = false;
+      document.getElementById('authScreen').hidden = false;
+      renderAuthScreen();
+    }
+  });
+  sb.auth.getSession().then(function(res){
+    if(res.data && res.data.session){
+      afterAuth();
+    } else {
+      renderAuthScreen();
+    }
+  });
+})();
