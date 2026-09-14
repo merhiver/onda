@@ -61,9 +61,11 @@ function fmtDateTime(ms){
   return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+pad2(d.getHours())+':'+pad2(d.getMinutes());
 }
 function fmtDow(s){ return ['일','월','화','수','목','금','토'][parseDate(s).getDay()]; }
+var ROLE_EMOJI = { a: '🐰', b: '🐈‍⬛' }; // 토끼 / 검은 고양이 — used wherever a name isn't set yet
+function roleEmoji(who){ return ROLE_EMOJI[who] || '?'; }
 function nameOf(who){
-  if(!state.profile) return who === 'a' ? '1번' : '2번';
-  return who === 'a' ? (state.profile.nameA || '1번') : (state.profile.nameB || '2번');
+  if(!state.profile) return roleEmoji(who);
+  return who === 'a' ? (state.profile.nameA || roleEmoji('a')) : (state.profile.nameB || roleEmoji('b'));
 }
 function myName(){ return nameOf(ME); }
 function partnerName(){ return nameOf(PARTNER); }
@@ -103,13 +105,20 @@ var authRole = null;     // 'a' | 'b', chosen during signup
 var authError = '';
 var authBusy = false;
 
+/* Supabase Auth only speaks email, so a plain "아이디" is turned into a
+   fake-but-valid-format email behind the scenes (never shown, never sent
+   anything — Confirm email is off). Lowercased so IDs aren't case-sensitive. */
+var AUTH_EMAIL_DOMAIN = '@onda.app';
+var USERNAME_RE = /^[a-z0-9_]{3,20}$/i;
+function usernameToEmail(u){ return u.trim().toLowerCase() + AUTH_EMAIL_DOMAIN; }
+
 function renderAuthScreen(){
   var el = document.getElementById('authScreen');
   if(!el) return;
   // preserve whatever's already typed — pickAuthRole()/a failed validation
   // both re-render this screen, and silently wiping the fields the user
   // just typed into would be a real papercut, not just a test artifact
-  var prevEmail = (document.getElementById('authEmail') || {}).value || '';
+  var prevUser = (document.getElementById('authUser') || {}).value || '';
   var prevPw = (document.getElementById('authPw') || {}).value || '';
   el.hidden = false;
   var isSignup = authMode === 'signup';
@@ -117,19 +126,19 @@ function renderAuthScreen(){
     '<div class="auth-card">' +
       '<div class="auth-logo">🌊 onda</div>' +
       '<h2>' + (isSignup ? '처음 오셨네요' : '로그인') + '</h2>' +
-      '<p class="sub">' + (isSignup ? '이메일과 비밀번호로 계정을 만들고, 둘 중 누구신지 골라주세요.' : '가입할 때 쓴 이메일과 비밀번호로 로그인하세요.') + '</p>' +
+      '<p class="sub">' + (isSignup ? '아이디와 비밀번호를 만들고, 둘 중 누구신지 골라주세요.' : '가입할 때 만든 아이디와 비밀번호로 로그인하세요.') + '</p>' +
       (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
-      '<div class="field"><label>이메일</label><input class="input" id="authEmail" type="email" autocomplete="email"></div>' +
+      '<div class="field"><label>아이디</label><input class="input" id="authUser" type="text" autocomplete="username" placeholder="영문/숫자/밑줄 3~20자"></div>' +
       '<div class="field"><label>비밀번호</label><input class="input" id="authPw" type="password" autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '"></div>' +
       (isSignup ?
         '<div class="field"><label>둘 중 누구신가요?</label><div class="choose-btns">' +
-          '<button type="button" class="' + (authRole==='a'?'active':'') + '" onclick="pickAuthRole(\'a\')">1번</button>' +
-          '<button type="button" class="' + (authRole==='b'?'active':'') + '" onclick="pickAuthRole(\'b\')">2번</button>' +
+          '<button type="button" class="' + (authRole==='a'?'active':'') + '" onclick="pickAuthRole(\'a\')">' + ROLE_EMOJI.a + '</button>' +
+          '<button type="button" class="' + (authRole==='b'?'active':'') + '" onclick="pickAuthRole(\'b\')">' + ROLE_EMOJI.b + '</button>' +
         '</div></div>' : '') +
       '<button class="btn block" onclick="submitAuth()"' + (authBusy?' disabled':'') + '>' + (authBusy ? '처리 중…' : (isSignup ? '가입하기' : '로그인')) + '</button>' +
       '<button class="auth-switch" onclick="toggleAuthMode()">' + (isSignup ? '이미 계정이 있어요 — 로그인' : '처음이에요 — 가입할게요') + '</button>' +
     '</div>';
-  document.getElementById('authEmail').value = prevEmail;
+  document.getElementById('authUser').value = prevUser;
   document.getElementById('authPw').value = prevPw;
 }
 window.pickAuthRole = function(r){ authRole = r; renderAuthScreen(); };
@@ -139,15 +148,20 @@ window.toggleAuthMode = function(){
   renderAuthScreen();
 };
 window.submitAuth = function(){
-  var email = document.getElementById('authEmail').value.trim();
+  var username = document.getElementById('authUser').value.trim();
   var pw = document.getElementById('authPw').value;
-  if(!email || !pw){ authError = '이메일과 비밀번호를 입력해주세요'; renderAuthScreen(); return; }
+  if(!username || !pw){ authError = '아이디와 비밀번호를 입력해주세요'; renderAuthScreen(); return; }
+  if(!USERNAME_RE.test(username)){ authError = '아이디는 영문/숫자/밑줄 3~20자로 만들어주세요'; renderAuthScreen(); return; }
   if(authMode === 'signup' && !authRole){ authError = '둘 중 누구신지 골라주세요'; renderAuthScreen(); return; }
   authBusy = true; authError = ''; renderAuthScreen();
+  var email = usernameToEmail(username);
 
   var flow = authMode === 'signup'
     ? sb.auth.signUp({ email: email, password: pw }).then(function(res){
-        if(res.error) throw res.error;
+        if(res.error){
+          if(/already registered/i.test(res.error.message)) throw new Error('이미 있는 아이디예요. 로그인으로 시도해보세요.');
+          throw res.error;
+        }
         if(!res.data.session){
           throw new Error('이메일 확인이 켜져 있어요. Supabase의 Authentication > Providers > Email에서 "Confirm email"을 꺼주세요.');
         }
@@ -156,7 +170,7 @@ window.submitAuth = function(){
         });
       })
     : sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res){
-        if(res.error) throw res.error;
+        if(res.error) throw new Error('아이디 또는 비밀번호가 올바르지 않아요');
       });
 
   flow.then(afterAuth).catch(function(e){
@@ -204,8 +218,8 @@ window.switchSettingsTab = function(t){
 function renderInfoTab(){
   var p = state.profile || {};
   return '<p class="sub">이름과 사귄 날짜를 설정하면 홈에 디데이가 표시돼요. 둘 중 누가 저장해도 서로에게 바로 반영돼요.</p>' +
-    '<div class="field"><label>1번 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'"></div>' +
-    '<div class="field"><label>2번 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'"></div>' +
+    '<div class="field"><label>' + ROLE_EMOJI.a + ' 이름</label><input class="input" id="setA" value="'+esc(p.nameA||'')+'"></div>' +
+    '<div class="field"><label>' + ROLE_EMOJI.b + ' 이름</label><input class="input" id="setB" value="'+esc(p.nameB||'')+'"></div>' +
     '<div class="field"><label>사귄 날짜</label><input class="input" id="setAnni" type="date" value="'+esc(p.anniversary||'')+'"></div>' +
     '<div class="row" style="margin-top:14px;">' +
       '<button class="btn secondary block" onclick="closeOverlay()">닫기</button>' +
@@ -249,8 +263,8 @@ function closeOverlay(){ document.getElementById('overlayRoot').innerHTML = ''; 
 window.closeOverlay = closeOverlay;
 window.openSettings = openSettings;
 window.saveProfile = function(){
-  var nameA = document.getElementById('setA').value.trim() || '1번';
-  var nameB = document.getElementById('setB').value.trim() || '2번';
+  var nameA = document.getElementById('setA').value.trim() || ROLE_EMOJI.a;
+  var nameB = document.getElementById('setB').value.trim() || ROLE_EMOJI.b;
   var anniversary = document.getElementById('setAnni').value || null;
   if(!dbApi) return;
   dbApi.doc('profile/profile').set({nameA:nameA, nameB:nameB, anniversary:anniversary}).then(closeOverlay);
@@ -388,7 +402,7 @@ function renderHome(){
   } else {
     ddayHtml = '<div class="dday" style="font-size:16px; color:var(--ink-muted);">사귄 날짜를 설정해보세요</div>';
   }
-  var names = p ? (esc(p.nameA||'1번') + '  ·  ' + esc(p.nameB||'2번')) : '설정 전';
+  var names = p ? (esc(p.nameA||ROLE_EMOJI.a) + '  ·  ' + esc(p.nameB||ROLE_EMOJI.b)) : '설정 전';
 
   var upcoming = state.events.filter(function(e){ return e.date >= todayStr(); }).sort(function(a,b){ return a.date < b.date ? -1 : 1; }).slice(0,3);
   var upcomingHtml = upcoming.length ? upcoming.map(function(e){
