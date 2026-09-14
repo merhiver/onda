@@ -12,11 +12,29 @@ var sb = null; // raw supabase client — needed for auth.* calls before dbApi e
    compared live via URL, without touching the shipped default layout. */
 var PREVIEW_MODE = new URLSearchParams(location.search).get('preview') || null;
 
-/* ---------- layout variant (?layout=c01|c02|c06|c07|c19) ---------- */
+/* ---------- layout variant (picked from Settings > 레이아웃, like 테마) ---------- */
 /* Same app, same data, same functions — only nav/hero/card chrome is
-   restyled per variant (desktop widths only; mobile is unaffected). */
-var LAYOUT_MODE = new URLSearchParams(location.search).get('layout') || null;
-if(LAYOUT_MODE) document.documentElement.setAttribute('data-layout', LAYOUT_MODE);
+   restyled per variant (desktop widths only; mobile is unaffected).
+   ?layout=cXX in the URL still works as a one-off preview (doesn't
+   touch the saved choice) — handy for sharing a link to one look. */
+var LAYOUT_OPTIONS = [
+  { id:'', name:'기본', desc:'지금 쓰던 기본 카드형 레이아웃' },
+  { id:'c01', name:'사이드바 대시보드', desc:'좌측 고정 내비 + 통계 타일형 히어로' },
+  { id:'c02', name:'에디토리얼 탑탭', desc:'상단 얇은 탭 + 초대형 타이포' },
+  { id:'c06', name:'채팅앱 셸', desc:'대화목록처럼 생긴 내비 + 말풍선 히어로' },
+  { id:'c07', name:'저널/일기장', desc:'카드 없이 타이포와 구분선만, 크림톤 종이' },
+  { id:'c19', name:'센터드', desc:'사이드바 없이 상단 알약 탭 + 좁은 리딩 컬럼' }
+];
+function getAppLayout(){
+  try{ return localStorage.getItem('onda_layout') || ''; }catch(e){ return ''; }
+}
+function applyAppLayout(id){
+  if(id) document.documentElement.setAttribute('data-layout', id);
+  else document.documentElement.removeAttribute('data-layout');
+}
+var urlLayout = new URLSearchParams(location.search).get('layout');
+var LAYOUT_MODE = (urlLayout && LAYOUT_OPTIONS.some(function(o){ return o.id === urlLayout; })) ? urlLayout : getAppLayout();
+applyAppLayout(LAYOUT_MODE);
 
 /* ---------- app theme (per-browser, picked from Settings > 테마) ---------- */
 function getAppTheme(){
@@ -262,8 +280,9 @@ function renderSettingsSheet(){
   var tabsHtml = '<div class="seg" style="margin-bottom:16px;">' +
       '<button class="' + (settingsTab==='info'?'active':'') + '" onclick="switchSettingsTab(\'info\')">두 사람 정보</button>' +
       '<button class="' + (settingsTab==='theme'?'active':'') + '" onclick="switchSettingsTab(\'theme\')">테마</button>' +
+      '<button class="' + (settingsTab==='layout'?'active':'') + '" onclick="switchSettingsTab(\'layout\')">레이아웃</button>' +
     '</div>';
-  var bodyHtml = settingsTab === 'theme' ? renderThemeTab() : renderInfoTab();
+  var bodyHtml = settingsTab === 'theme' ? renderThemeTab() : settingsTab === 'layout' ? renderLayoutTab() : renderInfoTab();
   return '<div class="overlay"><div class="sheet"><h2>설정</h2>' + tabsHtml + bodyHtml + '</div></div>';
 }
 window.switchSettingsTab = function(t){
@@ -312,6 +331,28 @@ function renderThemeTab(){
 window.chooseTheme = function(id){
   try{ localStorage.setItem('onda_theme', id); }catch(e){}
   applyAppTheme(id);
+  document.getElementById('overlayRoot').innerHTML = renderSettingsSheet();
+};
+
+function renderLayoutTab(){
+  var current = LAYOUT_MODE;
+  return '<p class="sub">홈 화면 배치를 골라보세요. 이 브라우저에만 적용되고, 좁은 화면에서는 항상 기본 배치로 보여요.</p>' +
+    '<div class="stack">' +
+    LAYOUT_OPTIONS.map(function(o){
+      var active = current === o.id;
+      return '<button type="button" class="theme-opt' + (active?' active':'') + '" onclick="chooseLayout(\''+o.id+'\')">' +
+        '<span class="theme-info"><span class="theme-name">' + esc(o.name) + '</span><span class="faint">' + esc(o.desc) + '</span></span>' +
+        (active ? '<span class="theme-check">✓</span>' : '') +
+      '</button>';
+    }).join('') +
+    '</div>' +
+    '<button class="btn secondary block" style="margin-top:14px;" onclick="closeOverlay()">닫기</button>';
+}
+window.chooseLayout = function(id){
+  try{ localStorage.setItem('onda_layout', id); }catch(e){}
+  LAYOUT_MODE = id;
+  applyAppLayout(id);
+  renderAll();
   document.getElementById('overlayRoot').innerHTML = renderSettingsSheet();
 };
 function closeOverlay(){ document.getElementById('overlayRoot').innerHTML = ''; settingsTab = 'info'; }
