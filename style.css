@@ -289,20 +289,15 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 }
 
 /* ====================================================================
-   Layout variants (?layout=c01..c23) — same data/functions, different
+   Layout variants (?layout=c01|c02|c06|c07|c19) — same data/functions, different
    nav/hero/card chrome. Nav/topbar REPOSITIONING is desktop-only (mobile
    keeps the proven bottom dock everywhere) — but each concept's color/
    shape signature (flat hero, dday treatment, palette) applies at every
    width, so a layout still reads as itself on a phone, not as the
    generic default.
    ==================================================================== */
-.quickadd-bar{display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:10px 14px;}
-.quickadd-icon{color:var(--ink-faint); flex:none;}
-.quickadd-input{flex:1; border:none; background:none; font-size:14px; color:var(--ink); outline:none; font-family:inherit;}
-.hero-block{display:none;}
-.hero-block-nav{display:flex; flex-direction:column; gap:2px;}
 /* transparent by default — #nav behaves as a direct flex child of #shell exactly
-   as before; c15/c19 turn this into the real flex item instead (see below), so
+   as before; c19 turns this into the real flex item instead (see below), so
    #nav's own max-width can't get clamped during #shell's line-wrap fitting */
 #navWrap{display:contents;}
 
@@ -315,8 +310,7 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
    where it resolves light (caught via a real screenshot, not assumed). */
 :root[data-layout="c01"][data-app-theme="wave"] .ocean-card, :root[data-layout="c02"][data-app-theme="wave"] .ocean-card,
 :root[data-layout="c06"][data-app-theme="wave"] .ocean-card, :root[data-layout="c07"][data-app-theme="wave"] .ocean-card,
-:root[data-layout="c15"][data-app-theme="wave"] .ocean-card, :root[data-layout="c19"][data-app-theme="wave"] .ocean-card,
-:root[data-layout="c23"][data-app-theme="wave"] .ocean-card{
+:root[data-layout="c19"][data-app-theme="wave"] .ocean-card{
   background:#0a5a68;
 }
 
@@ -346,12 +340,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
 :root[data-layout="c07"] .hero .annidate{color:var(--ink-faint);}
 :root[data-layout="c07"] .wave-deco{display:none;}
 :root[data-layout="c07"] .card{background:transparent; border:none; box-shadow:none; padding:0;}
-
-/* c15 — dday shrinks to a flat label/value row instead of a big card */
-:root[data-layout="c15"] #panel-home .hero{background:var(--surface); border:1px solid var(--hairline); box-shadow:none; display:flex; align-items:center; justify-content:space-between; padding:16px 18px; text-align:left;}
-:root[data-layout="c15"] #panel-home .hero::before{content:"우리의 디데이"; font-size:13px; font-weight:500; color:var(--ink);}
-:root[data-layout="c15"] #panel-home .hero .names, :root[data-layout="c15"] #panel-home .hero .annidate{display:none;}
-:root[data-layout="c15"] #panel-home .hero .dday{margin:0; font-size:24px; color:var(--primary);}
 
 /* c19 — flat white dday card instead of the dark gradient */
 :root[data-layout="c19"] #panel-home .hero{background:var(--surface); box-shadow:var(--shadow-1);}
@@ -422,20 +410,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c07"] .hero .dday{font-size:48px;}
   :root[data-layout="c07"] .card.stack{gap:10px;}
 
-  /* c15 — persistent quick-add bar + pill nav, dday shrinks to a flat label/value row */
-  :root[data-layout="c15"] #topbar{order:-4;}
-  :root[data-layout="c15"] #quickAdd{display:flex; flex:0 0 100%; order:-3; margin:0 8px 8px 40px;}
-  /* #nav's own max-width clamps its line-fitting size inside #shell, so it can end up
-     sharing a row with main instead of getting one to itself — #navWrap (unclamped)
-     becomes the real flex item here instead, #nav just centers inside it as normal block flow */
-  :root[data-layout="c15"] #navWrap{display:block; flex:0 0 100%; order:-2;}
-  :root[data-layout="c15"] #nav{width:auto; display:flex; flex-direction:row; justify-content:center; background:var(--surface-alt); border-radius:var(--radius-pill); box-shadow:none; padding:4px; margin:0 auto 16px; max-width:480px;}
-  :root[data-layout="c15"] .nav-brand{display:none;}
-  :root[data-layout="c15"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
-  :root[data-layout="c15"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
-  :root[data-layout="c15"] #panel-home .hero{padding:16px 20px;}
-  :root[data-layout="c15"] #panel-home .hero .dday{font-size:26px;}
-
   /* c19 — centered, no sidebar, pill tabs (mobile keeps the bottom dock) */
   :root[data-layout="c19"] #topbar{order:-2; justify-content:center; position:relative;}
   :root[data-layout="c19"] #gear{position:absolute; right:8px;}
@@ -445,44 +419,6 @@ main{flex:1; padding:4px 18px 110px; overflow-x:hidden;}
   :root[data-layout="c19"] .navbtn{flex-direction:row; padding:8px 16px; border-radius:var(--radius-pill);}
   :root[data-layout="c19"] .navbtn.active{background:var(--surface); color:var(--primary-active); box-shadow:var(--shadow-1);}
   :root[data-layout="c19"] main{max-width:520px; margin:0 auto; padding:0 8px 60px;}
-
-  /* c23 — narrow hero-as-sidebar, same treatment at a fixed width */
-  :root[data-layout="c23"] #shell{align-items:stretch;}
-  :root[data-layout="c23"] #nav{display:none;}
-  :root[data-layout="c23"] #heroBlock{
-    display:flex; flex-direction:column; justify-content:space-between; align-self:stretch;
-    width:240px; flex:none; background:#0a5a68; color:#fff;
-    border-radius:var(--radius-xl); box-shadow:none; padding:24px 18px; position:sticky; top:32px;
-  }
-  :root[data-layout="c23"] #heroBlock .hero{background:transparent; box-shadow:none; padding:0; text-align:left;}
-  :root[data-layout="c23"] .hero-block-nav{gap:4px;}
-  :root[data-layout="c23"] #heroBlock .navbtn{padding:14px 14px; font-size:15px; color:rgba(255,255,255,.65); font-weight:700; border-radius:9px;}
-  :root[data-layout="c23"] #heroBlock .navbtn:hover{background:rgba(255,255,255,.1);}
-  :root[data-layout="c23"] #heroBlock .navbtn.active{background:rgba(255,255,255,.16); color:#fff;}
-  :root[data-layout="c23"] main{flex:1; max-width:640px; margin:0; padding:0 8px 60px 24px;}
-  :root[data-layout="c23"] #topbar{padding:0 8px 20px calc(240px + 24px);}
-
-  /* #heroBlock isn't a .hero/.ocean-card, so it has no theme-aware color of its
-     own — it must borrow each theme's actual hero hex (same values as the
-     [data-app-theme="X"] .hero rules below) instead of a guessed variable.
-     New theme added later? add its color here too, or this panel goes dark-on-dark/light-on-light. */
-  :root[data-layout="c23"][data-app-theme="summer"] #heroBlock{background:#023e8a;}
-  :root[data-layout="c23"][data-app-theme="winter"] #heroBlock{background:#132639;}
-  :root[data-layout="c23"][data-app-theme="storm"] #heroBlock{background:#1f2430;}
-  :root[data-layout="c23"][data-app-theme="coral-reef"] #heroBlock{background:#0b4d43;}
-  :root[data-layout="c23"][data-app-theme="sea-salt"] #heroBlock{background:#23282b;}
-  :root[data-layout="c23"][data-app-theme="high-tide"] #heroBlock{background:#0d4a40;}
-  :root[data-layout="c23"][data-app-theme="yunseul"] #heroBlock{background:#0d2b42;}
-  :root[data-layout="c23"][data-app-theme="midnight"] #heroBlock{background:#050510;}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock{background:var(--surface); color:var(--ink); border:1px solid var(--hairline);}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .hero .names{color:var(--ink-muted);}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .hero .annidate{color:var(--ink-faint);}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn{color:var(--ink-muted);}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn:hover{background:var(--surface-alt);}
-  :root[data-layout="c23"][data-app-theme="supabase"] #heroBlock .navbtn.active{background:var(--surface-alt); color:var(--ink);}
-
-  /* heroBlock already shows the dday card persistently — don't repeat it in the home panel */
-  :root[data-layout="c23"] #panel-home .hero{display:none;}
 }
 
 /* ---- theme picker (settings sheet) ---- */

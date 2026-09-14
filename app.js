@@ -20,7 +20,7 @@ var ME = null, PARTNER = null;
    compared live via URL, without touching the shipped default layout. */
 var PREVIEW_MODE = new URLSearchParams(location.search).get('preview') || null;
 
-/* ---------- layout variant (?layout=c01|c02|c06|c07|c15|c19|c23) ---------- */
+/* ---------- layout variant (?layout=c01|c02|c06|c07|c19) ---------- */
 /* Same app, same data, same functions — only nav/hero/card chrome is
    restyled per variant (desktop widths only; mobile is unaffected). */
 var LAYOUT_MODE = new URLSearchParams(location.search).get('layout') || null;
@@ -261,33 +261,7 @@ function renderAll(){
   renderChat();
   renderSideWidget();
   renderNavSub();
-  renderHeroBlock();
   updateBadge();
-}
-
-/* ---------- persistent hero block (layout=c23: shown on every tab) ---------- */
-function renderHeroBlock(){
-  var el = document.getElementById('heroBlock');
-  if(!el) return;
-  if(LAYOUT_MODE !== 'c23'){ el.hidden = true; return; }
-  el.hidden = false;
-  var p = state.profile;
-  var ddayHtml;
-  if(p && p.anniversary){
-    var days = Math.floor((startOfDay(new Date()) - startOfDay(parseDate(p.anniversary))) / 86400000) + 1;
-    ddayHtml = '<div class="dday tabular">D+' + days + '</div><div class="annidate">' + esc(p.anniversary) + ' 부터</div>';
-  } else {
-    ddayHtml = '<div class="dday" style="font-size:16px;">사귄 날짜를 설정해보세요</div>';
-  }
-  var names = p ? (esc(p.nameA||'1번') + '  ·  ' + esc(p.nameB||'2번')) : '설정 전';
-  el.innerHTML =
-    '<nav class="hero-block-nav">' +
-      ['home','calendar','record','bucket','question'].map(function(t){
-        var labels = {home:'홈', calendar:'캘린더', record:'기록', bucket:'버킷', question:'질문'};
-        return '<button class="navbtn' + (tab===t?' active':'') + '" onclick="switchTab(\''+t+'\')">' + esc(labels[t]) + '</button>';
-      }).join('') +
-    '</nav>' +
-    '<div class="hero"><div class="names">' + names + '</div>' + ddayHtml + '</div>';
 }
 
 /* ---------- layout preview widgets (see PREVIEW_MODE above) ---------- */
@@ -372,7 +346,7 @@ function renderHome(){
     '<div class="card">' + upcomingHtml + '</div>' +
     '<div class="section-title">최근 기록</div>' +
     recentHtml;
-  if(PREVIEW_MODE === 'grid' || LAYOUT_MODE === 'c01' || LAYOUT_MODE === 'c23'){
+  if(PREVIEW_MODE === 'grid' || LAYOUT_MODE === 'c01'){
     listsHtml = '<div class="home-2col">' +
       '<div><div class="section-title">다가오는 일정</div><div class="card">' + upcomingHtml + '</div></div>' +
       '<div><div class="section-title">최근 기록</div>' + recentHtml + '</div>' +
@@ -500,14 +474,6 @@ window.addEntry = function(){
   if(!text || !dbApi) return;
   dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, createdAt: Date.now()});
   ta.value = '';
-};
-window.quickAddSubmit = function(){
-  var input = document.getElementById('quickAddInput');
-  var text = input.value.trim();
-  if(!text || !dbApi) return;
-  dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, createdAt: Date.now()});
-  input.value = '';
-  switchTab('record');
 };
 window.deleteEntry = function(id){
   if(!dbApi) return;
