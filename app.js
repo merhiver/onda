@@ -116,12 +116,11 @@ function questionForDate(dateStr){ return QUESTIONS[dayOfYear(parseDate(dateStr)
 var WAVE_SVG = '<svg class="wave-deco" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true">' +
   '<path d="M0 14 C 50 24 100 4 150 14 C 200 24 250 4 300 14 C 350 24 400 14 400 14 V24 H0 Z" fill="currentColor"/></svg>';
 
-/* ---------- identity chooser (fallback) ---------- */
 /* ---------- login / signup screen (full-screen, shown until authenticated) ---------- */
 var authMode = 'signin'; // 'signin' | 'signup'
-var authRole = null;     // 'a' | 'b', chosen during signup
 var authError = '';
 var authBusy = false;
+var MY_COUPLE_ID = null; // set once afterAuth()/submitCoupleSetup() resolves who ME is
 
 /* Supabase Auth only speaks email, so a plain "아이디" is turned into a
    fake-but-valid-format email behind the scenes (never shown, never sent
@@ -133,9 +132,9 @@ function usernameToEmail(u){ return u.trim().toLowerCase() + AUTH_EMAIL_DOMAIN; 
 function renderAuthScreen(){
   var el = document.getElementById('authScreen');
   if(!el) return;
-  // preserve whatever's already typed — pickAuthRole()/a failed validation
-  // both re-render this screen, and silently wiping the fields the user
-  // just typed into would be a real papercut, not just a test artifact
+  // preserve whatever's already typed — a failed validation re-renders
+  // this screen, and silently wiping what the user just typed would be
+  // a real papercut, not just a test artifact
   var prevUser = (document.getElementById('authUser') || {}).value || '';
   var prevPw = (document.getElementById('authPw') || {}).value || '';
   el.hidden = false;
@@ -144,25 +143,19 @@ function renderAuthScreen(){
     '<div class="auth-card">' +
       '<div class="auth-logo">🌊 onda</div>' +
       '<h2>' + (isSignup ? '처음 오셨네요' : '로그인') + '</h2>' +
-      '<p class="sub">' + (isSignup ? '아이디와 비밀번호를 만들고, 둘 중 누구신지 골라주세요.' : '가입할 때 만든 아이디와 비밀번호로 로그인하세요.') + '</p>' +
+      '<p class="sub">' + (isSignup ? '아이디와 비밀번호를 먼저 만들어주세요. 커플 연결은 다음 단계에서 해요.' : '가입할 때 만든 아이디와 비밀번호로 로그인하세요.') + '</p>' +
       (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
       '<div class="field"><label>아이디</label><input class="input" id="authUser" type="text" autocomplete="username" placeholder="영문/숫자/밑줄 3~20자"></div>' +
       '<div class="field"><label>비밀번호</label><input class="input" id="authPw" type="password" autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '"></div>' +
-      (isSignup ?
-        '<div class="field"><label>둘 중 누구신가요?</label><div class="choose-btns">' +
-          '<button type="button" class="' + (authRole==='a'?'active':'') + '" onclick="pickAuthRole(\'a\')">' + ROLE_EMOJI.a + '</button>' +
-          '<button type="button" class="' + (authRole==='b'?'active':'') + '" onclick="pickAuthRole(\'b\')">' + ROLE_EMOJI.b + '</button>' +
-        '</div></div>' : '') +
-      '<button class="btn block" onclick="submitAuth()"' + (authBusy?' disabled':'') + '>' + (authBusy ? '처리 중…' : (isSignup ? '가입하기' : '로그인')) + '</button>' +
+      '<button class="btn block" onclick="submitAuth()"' + (authBusy?' disabled':'') + '>' + (authBusy ? '처리 중…' : (isSignup ? '다음' : '로그인')) + '</button>' +
       '<button class="auth-switch" onclick="toggleAuthMode()">' + (isSignup ? '이미 계정이 있어요 — 로그인' : '처음이에요 — 가입할게요') + '</button>' +
     '</div>';
   document.getElementById('authUser').value = prevUser;
   document.getElementById('authPw').value = prevPw;
 }
-window.pickAuthRole = function(r){ authRole = r; renderAuthScreen(); };
 window.toggleAuthMode = function(){
   authMode = authMode === 'signin' ? 'signup' : 'signin';
-  authRole = null; authError = '';
+  authError = '';
   renderAuthScreen();
 };
 /* Supabase's own auth error text is always English — translate every
@@ -177,8 +170,8 @@ function translateAuthError(msg){
   if(/network|fetch|failed to fetch/i.test(msg)) return '네트워크 연결을 확인해주세요';
   return '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
 }
-var SETUP_INCOMPLETE_MSG = 'DB 설정이 아직 안 끝났어요. Supabase SQL Editor에서 migrate-to-auth.sql을 실행해주세요.';
-function isMissingMembersTable(err){
+var SETUP_INCOMPLETE_MSG = 'DB 설정이 아직 안 끝났어요. Supabase SQL Editor에서 migrate-to-couples.sql을 실행해주세요.';
+function isMissingTable(err){
   return !!err && (err.code === 'PGRST205' || /could not find the table/i.test(err.message || ''));
 }
 window.submitAuth = function(){
@@ -186,7 +179,6 @@ window.submitAuth = function(){
   var pw = document.getElementById('authPw').value;
   if(!username || !pw){ authError = '아이디와 비밀번호를 입력해주세요'; renderAuthScreen(); return; }
   if(!USERNAME_RE.test(username)){ authError = '아이디는 영문/숫자/밑줄 3~20자로 만들어주세요'; renderAuthScreen(); return; }
-  if(authMode === 'signup' && !authRole){ authError = '둘 중 누구신지 골라주세요'; renderAuthScreen(); return; }
   authBusy = true; authError = ''; renderAuthScreen();
   var email = usernameToEmail(username);
 
@@ -196,18 +188,16 @@ window.submitAuth = function(){
         if(!res.data.session){
           throw new Error('이메일 확인이 켜져 있어요. Supabase의 Authentication > Providers > Email에서 "Confirm email"을 꺼주세요.');
         }
-        return sb.from('members').insert({ uid: res.data.user.id, role: authRole }).then(function(ins){
-          if(ins.error){
-            if(isMissingMembersTable(ins.error)) throw new Error(SETUP_INCOMPLETE_MSG);
-            throw new Error('이미 등록된 자리예요. 로그인으로 시도해보세요.');
-          }
-        });
+        authBusy = false;
+        setupMode = null; setupRole = null;
+        renderCoupleSetupScreen(res.data.user.id);
       })
     : sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res){
         if(res.error) throw new Error(translateAuthError(res.error.message));
+        return afterAuth();
       });
 
-  flow.then(afterAuth).catch(function(e){
+  flow.catch(function(e){
     authBusy = false;
     authError = (e && e.message) || '문제가 발생했어요';
     renderAuthScreen();
@@ -217,57 +207,139 @@ function afterAuth(){
   return sb.auth.getSession().then(function(res){
     var uid = res.data && res.data.session && res.data.session.user && res.data.session.user.id;
     if(!uid){ authBusy = false; authError = '로그인에 실패했어요'; renderAuthScreen(); return; }
-    return sb.from('members').select('role').eq('uid', uid).maybeSingle().then(function(m){
+    return sb.from('members').select('role, coupleId').eq('uid', uid).maybeSingle().then(function(m){
       authBusy = false;
       if(m.error){
-        authError = isMissingMembersTable(m.error) ? SETUP_INCOMPLETE_MSG : '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
+        authError = isMissingTable(m.error) ? SETUP_INCOMPLETE_MSG : '문제가 발생했어요. 잠시 후 다시 시도해주세요.';
         renderAuthScreen(); return;
       }
       if(!m.data){
-        // signed in fine, but no role was ever claimed — happens when an
-        // earlier signup created the account and then failed (rate limit,
-        // email confirm) before reaching the members insert. Recover
-        // instead of dead-ending: let them claim a role right now.
-        renderClaimRoleScreen(uid);
+        // signed in fine, but never finished couple setup — happens when
+        // an earlier attempt got interrupted (rate limit, closed the tab
+        // mid-flow, etc). Recover instead of dead-ending: send them back
+        // into the same create/join screen, uid already known.
+        setupMode = null; setupRole = null;
+        renderCoupleSetupScreen(uid);
         return;
       }
-      ME = m.data.role; PARTNER = ME === 'a' ? 'b' : 'a';
+      ME = m.data.role; PARTNER = ME === 'a' ? 'b' : 'a'; MY_COUPLE_ID = m.data.coupleId;
       document.getElementById('authScreen').hidden = true;
       boot();
     });
   });
 }
-function renderClaimRoleScreen(uid){
+
+/* ---------- couple setup: create a new couple (get an invite code) or
+   join one with a code someone else already generated ---------- */
+var setupMode = null; // 'create' | 'join'
+var setupRole = null; // 'a' | 'b'
+var pendingCoupleCode = null;
+var COUPLE_CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L — easy to read aloud
+function genCoupleCode(){
+  var out = '';
+  for(var i=0;i<6;i++) out += COUPLE_CODE_CHARS[Math.floor(Math.random()*COUPLE_CODE_CHARS.length)];
+  return out;
+}
+function renderCoupleSetupScreen(uid){
+  var el = document.getElementById('authScreen');
+  if(!el) return;
+  var prevCode = (document.getElementById('setupCodeInput') || {}).value || '';
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="auth-card">' +
+      '<div class="auth-logo">🌊 onda</div>' +
+      '<h2>거의 다 됐어요</h2>' +
+      '<p class="sub">둘이 같은 커플로 묶이려면, 한 분이 커플을 만들고 초대 코드를 상대방에게 알려주면 돼요.</p>' +
+      (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
+      '<div class="field"><label>어떻게 시작할까요?</label><div class="choose-btns">' +
+        '<button type="button" class="' + (setupMode==='create'?'active':'') + '" onclick="pickSetupMode(\'' + uid + '\',\'create\')">커플 만들기</button>' +
+        '<button type="button" class="' + (setupMode==='join'?'active':'') + '" onclick="pickSetupMode(\'' + uid + '\',\'join\')">코드로 참여하기</button>' +
+      '</div></div>' +
+      (setupMode === 'join' ? '<div class="field"><label>초대 코드</label><input class="input" id="setupCodeInput" placeholder="상대방에게 받은 6자리 코드" style="text-transform:uppercase;"></div>' : '') +
+      (setupMode ? (
+        '<div class="field"><label>둘 중 누구신가요?</label><div class="choose-btns">' +
+          '<button type="button" class="' + (setupRole==='a'?'active':'') + '" onclick="pickSetupRole(\'' + uid + '\',\'a\')">' + ROLE_EMOJI.a + '</button>' +
+          '<button type="button" class="' + (setupRole==='b'?'active':'') + '" onclick="pickSetupRole(\'' + uid + '\',\'b\')">' + ROLE_EMOJI.b + '</button>' +
+        '</div></div>'
+      ) : '') +
+      '<button class="btn block" onclick="submitCoupleSetup(\'' + uid + '\')"' + (authBusy?' disabled':'') + '>' + (authBusy ? '처리 중…' : '계속하기') + '</button>' +
+    '</div>';
+  if(setupMode === 'join'){ document.getElementById('setupCodeInput').value = prevCode; }
+}
+window.pickSetupMode = function(uid, mode){ setupMode = mode; renderCoupleSetupScreen(uid); };
+window.pickSetupRole = function(uid, role){ setupRole = role; renderCoupleSetupScreen(uid); };
+window.submitCoupleSetup = function(uid){
+  if(!setupMode){ authError = '커플 만들기 또는 코드로 참여하기를 골라주세요'; renderCoupleSetupScreen(uid); return; }
+  if(!setupRole){ authError = '둘 중 누구신지 골라주세요'; renderCoupleSetupScreen(uid); return; }
+  var code = ((document.getElementById('setupCodeInput')||{}).value || '').trim().toUpperCase();
+  if(setupMode === 'join' && !code){ authError = '초대 코드를 입력해주세요'; renderCoupleSetupScreen(uid); return; }
+  authBusy = true; authError = ''; renderCoupleSetupScreen(uid);
+
+  var role = setupRole;
+  var couplePromise = setupMode === 'create'
+    ? (function(){
+        var newCode = genCoupleCode();
+        return sb.from('couples').insert({ code: newCode }).select('id').single().then(function(res){
+          if(res.error){
+            if(isMissingTable(res.error)) throw new Error(SETUP_INCOMPLETE_MSG);
+            throw new Error('커플 생성에 실패했어요. 다시 시도해주세요.');
+          }
+          pendingCoupleCode = newCode;
+          return res.data.id;
+        });
+      })()
+    : sb.from('couples').select('id').eq('code', code).maybeSingle().then(function(res){
+        if(res.error){
+          if(isMissingTable(res.error)) throw new Error(SETUP_INCOMPLETE_MSG);
+          throw new Error('문제가 발생했어요. 잠시 후 다시 시도해주세요.');
+        }
+        if(!res.data) throw new Error('그 코드를 찾을 수 없어요. 다시 확인해주세요.');
+        return res.data.id;
+      });
+
+  couplePromise.then(function(coupleId){
+    return sb.from('members').insert({ uid: uid, coupleId: coupleId, role: role }).then(function(ins){
+      if(ins.error){
+        if(isMissingTable(ins.error)) throw new Error(SETUP_INCOMPLETE_MSG);
+        throw new Error('그 자리는 이미 등록됐어요. 다른 쪽으로 시도해보세요.');
+      }
+      return coupleId;
+    });
+  }).then(function(coupleId){
+    authBusy = false;
+    ME = role; PARTNER = role === 'a' ? 'b' : 'a'; MY_COUPLE_ID = coupleId;
+    if(setupMode === 'create'){
+      renderCodeRevealScreen(pendingCoupleCode);
+    } else {
+      document.getElementById('authScreen').hidden = true;
+      boot();
+    }
+  }).catch(function(e){
+    authBusy = false;
+    authError = (e && e.message) || '문제가 발생했어요';
+    renderCoupleSetupScreen(uid);
+  });
+};
+function renderCodeRevealScreen(code){
   var el = document.getElementById('authScreen');
   if(!el) return;
   el.hidden = false;
   el.innerHTML =
     '<div class="auth-card">' +
       '<div class="auth-logo">🌊 onda</div>' +
-      '<h2>거의 다 됐어요</h2>' +
-      '<p class="sub">로그인은 됐는데 아직 역할을 안 고르셨네요. 둘 중 누구신가요?</p>' +
-      (authError ? '<div class="auth-err">' + esc(authError) + '</div>' : '') +
-      '<div class="choose-btns">' +
-        '<button type="button" onclick="claimRole(\'' + uid + '\',\'a\')">' + ROLE_EMOJI.a + '</button>' +
-        '<button type="button" onclick="claimRole(\'' + uid + '\',\'b\')">' + ROLE_EMOJI.b + '</button>' +
-      '</div>' +
+      '<h2>커플이 만들어졌어요</h2>' +
+      '<p class="sub">이 코드를 상대방에게 알려주세요. 가입할 때 "코드로 참여하기"에 이 코드를 입력하면 같이 쓸 수 있어요.</p>' +
+      '<div class="invite-code">' + esc(code) + '</div>' +
+      '<button class="btn block" onclick="finishCodeReveal()">확인했어요, 시작할게요</button>' +
     '</div>';
 }
-window.claimRole = function(uid, role){
-  authError = '';
-  sb.from('members').insert({ uid: uid, role: role }).then(function(ins){
-    if(ins.error){
-      authError = '이미 등록된 자리예요. 다른 쪽으로 시도해보세요.';
-      renderClaimRoleScreen(uid);
-      return;
-    }
-    ME = role; PARTNER = role === 'a' ? 'b' : 'a';
-    document.getElementById('authScreen').hidden = true;
-    boot();
-  });
+window.finishCodeReveal = function(){
+  document.getElementById('authScreen').hidden = true;
+  boot();
 };
 window.logout = function(){
   closeOverlay();
+  MY_COUPLE_ID = null;
   sb.auth.signOut();
 };
 
@@ -363,7 +435,7 @@ window.saveProfile = function(){
   var nameB = document.getElementById('setB').value.trim() || ROLE_EMOJI.b;
   var anniversary = document.getElementById('setAnni').value || null;
   if(!dbApi) return;
-  dbApi.doc('profile/profile').set({nameA:nameA, nameB:nameB, anniversary:anniversary}).then(closeOverlay);
+  dbApi.doc('profile/' + MY_COUPLE_ID).set({nameA:nameA, nameB:nameB, anniversary:anniversary}).then(closeOverlay);
 };
 
 /* ---------- tabs ---------- */
@@ -386,7 +458,7 @@ function openChat(){
   document.getElementById('chatPanel').hidden = false;
   if(dbApi && ME){
     state.lastSeenTs = Date.now();
-    dbApi.doc('lastSeen/'+ME).set({ts: state.lastSeenTs});
+    dbApi.doc('lastSeen/'+MY_COUPLE_ID+'_'+ME).set({ts: state.lastSeenTs, coupleId: MY_COUPLE_ID});
     updateBadge();
   }
   renderChat();
@@ -605,7 +677,7 @@ window.addEvent = function(){
   var input = document.getElementById('newEventTitle');
   var title = input.value.trim();
   if(!title || !dbApi || !state.selectedDay) return;
-  dbApi.collection('events').add({date: state.selectedDay, title: title, author: ME, createdAt: Date.now()});
+  dbApi.collection('events').add({date: state.selectedDay, title: title, author: ME, coupleId: MY_COUPLE_ID, createdAt: Date.now()});
   input.value = '';
 };
 window.deleteEvent = function(id){
@@ -644,7 +716,7 @@ window.addEntry = function(){
   var ta = document.getElementById('newEntryText');
   var text = ta.value.trim();
   if(!text || !dbApi) return;
-  dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, createdAt: Date.now()});
+  dbApi.collection('entries').add({date: todayStr(), text: text, author: ME, coupleId: MY_COUPLE_ID, createdAt: Date.now()});
   ta.value = '';
 };
 window.deleteEntry = function(id){
@@ -776,7 +848,7 @@ window.addBucket = function(){
   var input = document.getElementById('newBucketText');
   var text = input.value.trim();
   if(!text || !dbApi) return;
-  var data = {kind: state.bucketFilter, text: text, done:false, doneDate:null, author: ME, createdAt: Date.now()};
+  var data = {kind: state.bucketFilter, text: text, done:false, doneDate:null, author: ME, coupleId: MY_COUPLE_ID, createdAt: Date.now()};
   if(state.bucketFilter === 'date' && selectedPlace && selectedPlace.name === text){
     data.mapUrl = 'https://map.kakao.com/link/map/' + encodeURIComponent(selectedPlace.name) + ',' + selectedPlace.lat + ',' + selectedPlace.lng;
   }
@@ -882,12 +954,12 @@ window.saveAnswer = function(dateStr){
   var ta = document.getElementById('ans-input-' + dateStr);
   var text = ta.value.trim();
   if(!text || !dbApi) return;
-  dbApi.doc('answers/' + dateStr + '_' + ME).set({date: dateStr, author: ME, text: text, createdAt: Date.now()});
+  dbApi.doc('answers/' + MY_COUPLE_ID + '_' + dateStr + '_' + ME).set({date: dateStr, author: ME, coupleId: MY_COUPLE_ID, text: text, createdAt: Date.now()});
   editingAnswerDate = null;
 };
 window.deleteAnswer = function(dateStr){
   if(!dbApi) return;
-  dbApi.doc('answers/' + dateStr + '_' + ME).delete();
+  dbApi.doc('answers/' + MY_COUPLE_ID + '_' + dateStr + '_' + ME).delete();
 };
 
 /* ---------- MESSAGES (floating chat widget, global) ---------- */
@@ -915,7 +987,7 @@ window.sendMessage = function(){
   var ta = document.getElementById('newMessage');
   var text = ta.value.trim();
   if(!text || !dbApi) return;
-  dbApi.collection('messages').add({text: text, author: ME, createdAt: Date.now()});
+  dbApi.collection('messages').add({text: text, author: ME, coupleId: MY_COUPLE_ID, createdAt: Date.now()});
   ta.value = '';
 };
 window.deleteMessage = function(id){
@@ -925,7 +997,7 @@ window.deleteMessage = function(id){
 
 /* ---------- boot ---------- */
 function subscribe(){
-  dbApi.doc('profile/profile').onSnapshot(function(snap){
+  dbApi.doc('profile/' + MY_COUPLE_ID).onSnapshot(function(snap){
     state.profile = snap.exists ? snap.data() : null;
     if(!state.profile) openOnboardingIfNeeded();
     renderAll();
@@ -950,7 +1022,7 @@ function subscribe(){
     state.answers = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     renderAll();
   });
-  dbApi.doc('lastSeen/' + ME).get().then(function(snap){
+  dbApi.doc('lastSeen/' + MY_COUPLE_ID + '_' + ME).get().then(function(snap){
     state.lastSeenTs = snap.exists ? (snap.data().ts || 0) : 0;
     updateBadge();
   });
@@ -984,8 +1056,8 @@ function boot(){
   sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
   sb.auth.onAuthStateChange(function(event){
     if(event === 'SIGNED_OUT'){
-      ME = null; PARTNER = null; dbApi = null;
-      authMode = 'signin'; authRole = null; authError = ''; authBusy = false;
+      ME = null; PARTNER = null; MY_COUPLE_ID = null; dbApi = null;
+      authMode = 'signin'; setupMode = null; setupRole = null; authError = ''; authBusy = false;
       document.getElementById('authScreen').hidden = false;
       renderAuthScreen();
     }
