@@ -10,7 +10,7 @@
 | 2 | Network Fundamentals | 서브넷 계산 | ❌ (모름) | 모름 | 개념 부족 (배운 적 없음) | 계산 방법을 처음부터 배워야 함 |
 | 3 | Network Access | VLAN / Trunk (802.1Q) | ✅ (B) | 애매 | — (추론으로 맞힘) | 정답은 유추했지만 이유를 설명하지 못함. 트렁크 허용 VLAN, 802.1Q 태그, native VLAN 개념 보강 필요 |
 | 4 | Network Access | STP | ❌ ① D 선택, 정답 C / △ ② 루프 | 애매 | 개념 부족 | 루트 브리지 선출 규칙(Priority 먼저 비교, 같으면 MAC 비교)을 모름. STP가 없으면 루프가 생긴다는 방향은 맞았지만 동작 원리는 설명하지 못함 |
-| 5 | IP Connectivity | 라우팅 테이블 해석 | | | | |
+| 5 | IP Connectivity | 라우팅 테이블 해석 | ✅ ① D / ✅ ② B | 미기재 | — | 둘 다 맞힘. AD(static 1 < OSPF 110) 함정에 빠지지 않음. Longest prefix match라는 용어와, 여러 경로가 동시에 일치할 때의 규칙은 설명하지 않음 |
 | 6 | IP Connectivity | OSPF | | | | |
 | 7 | IP Services | DHCP / NAT | | | | |
 | 8 | Security Fundamentals | ACL | | | | |
